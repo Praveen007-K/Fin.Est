@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.compose.ui.unit.dp
+import com.example.finest.presentation.navigation.NavigationHost
 import com.example.finest.presentation.screens.transaction.Transaction
 
 class MainActivity : ComponentActivity() {
@@ -22,7 +23,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-                Transaction()
+                NavigationHost()
         }
     }
 }

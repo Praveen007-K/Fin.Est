@@ -1,25 +1,28 @@
 package com.example.finest.presentation.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavGraph
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.finest.presentation.screens.details.Details
+import com.example.finest.presentation.screens.transaction.Transaction
+import kotlinx.serialization.Serializable
 
 @Composable
 fun NavigationHost(){
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = ScreenA) {
-
+    NavHost(navController = navController, startDestination = TransactionType) {
+        composable<TransactionType> { Transaction(navController) }
+        composable<Details> { Details() }
     }
 }
+
+@Serializable
+object TransactionType
+
+@Serializable
+object Details

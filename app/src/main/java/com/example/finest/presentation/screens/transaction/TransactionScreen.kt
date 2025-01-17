@@ -9,16 +9,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import com.example.finest.presentation.navigation.Details
 
-@Preview
+//@Preview
 @Composable
-fun Transaction(){
+fun Transaction(navController: NavHostController){
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ){
         Column {
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = {
+                navController.navigate(Details)
+            }) {
                 Text(text = "Button 1")
             }
             Button(onClick = { /*TODO*/ }) {
