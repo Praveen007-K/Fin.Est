@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import com.example.finest.presentation.screens.tabs.CreditScreen
+import com.example.finest.presentation.screens.tabs.DebitScreen
 
 @Composable
 fun HomeScreen() {

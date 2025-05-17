@@ -1,4 +1,4 @@
-package com.example.finest.presentation.screens
+package com.example.finest.presentation.screens.tabs
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
