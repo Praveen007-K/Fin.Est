@@ -6,14 +6,18 @@ import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finest.data.dummy.DummyData
 import com.example.finest.domain.model.CreditEntry
 import com.example.finest.domain.model.DebitEntry
+import com.example.finest.presentation.viewmodel.FinanceViewModel
 
 @Composable
 fun StatsScreen() {
     val tabs = listOf("Credit Stats", "Debit Stats")
     var selectedTabIndex by remember { mutableStateOf(0) }
+
+
 
     Column {
         TabRow(selectedTabIndex = selectedTabIndex) {
@@ -36,7 +40,8 @@ fun StatsScreen() {
 }
 @Composable
 fun CreditStatsTab() {
-    val credits = DummyData.dummyCredits
+    val viewModel: FinanceViewModel = viewModel()
+    val credits by viewModel.credits.collectAsState()
     val total = credits.sumOf { it.amount }
     val grouped = credits.groupBy { it.source }
         .mapValues { it.value.sumOf { entry -> entry.amount } }
@@ -56,7 +61,8 @@ fun CreditStatsTab() {
 
 @Composable
 fun DebitStatsTab() {
-    val debits = DummyData.dummyDebits
+    val viewModel: FinanceViewModel = viewModel()
+    val debits by viewModel.debits.collectAsState()
     val total = debits.sumOf { it.amount }
     val grouped = debits.groupBy { it.category }
         .mapValues { it.value.sumOf { entry -> entry.amount } }

@@ -2,5 +2,8 @@ package com.example.finest.domain.model  // use your appropriate package here
 
 data class DebitEntry(
     val category: String,
-    val amount: Double
+    val paymentMethod: String,
+    val bank: String,
+    val amount: Double,
+    val description: String? = null
 )

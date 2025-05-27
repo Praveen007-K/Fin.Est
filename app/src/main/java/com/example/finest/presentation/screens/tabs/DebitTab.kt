@@ -5,8 +5,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.finest.data.local.entities.DebitEntryEntity
 import com.example.finest.presentation.components.DropdownField
 import com.example.finest.presentation.components.AmountTextField
+import com.example.finest.presentation.viewmodel.FinanceViewModel
 
 @Composable
 fun DebitScreen() {
@@ -19,6 +22,9 @@ fun DebitScreen() {
     val categories = listOf("Housing", "Food", "Transport", "Utilities", "Dependents", "Entertainment", "Health", "Finance")
     val paymentMethods = listOf("UPI", "Cash", "Card", "Net Banking")
     val banks = listOf("SBI", "BOB", "HDFC")
+
+
+    val viewModel: FinanceViewModel = viewModel()
 
     Column(Modifier.padding(16.dp)) {
         DropdownField("Expense Category", categories, category) { category = it }
@@ -47,7 +53,15 @@ fun DebitScreen() {
         Spacer(Modifier.height(16.dp))
 
         Button(onClick = {
-            // Save data
+            viewModel.addDebit(
+                DebitEntryEntity(
+                    category = category,
+                    paymentMethod = paymentMethod,
+                    bank = bank,
+                    amount = amount.toDouble(),
+                    description = description
+                )
+            )
         }) {
             Text("Submit")
         }
