@@ -5,11 +5,16 @@ import androidx.lifecycle.viewModelScope
 import com.example.finest.data.local.entities.CreditEntryEntity
 import com.example.finest.data.local.entities.DebitEntryEntity
 import com.example.finest.data.repository.FinanceRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class FinanceViewModel(private val repository: FinanceRepository) : ViewModel() {
+@HiltViewModel
+class FinanceViewModel @Inject constructor(
+    private val repository: FinanceRepository
+) : ViewModel() {
 
     private val _debits = MutableStateFlow<List<DebitEntryEntity>>(emptyList())
     val debits: StateFlow<List<DebitEntryEntity>> = _debits
@@ -38,3 +43,4 @@ class FinanceViewModel(private val repository: FinanceRepository) : ViewModel() 
         }
     }
 }
+

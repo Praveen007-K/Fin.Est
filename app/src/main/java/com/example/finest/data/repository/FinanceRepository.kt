@@ -6,8 +6,9 @@ import com.example.finest.data.local.entities.CreditEntryEntity
 import com.example.finest.data.local.entities.DebitEntryEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import javax.inject.Inject
 
-class FinanceRepository(
+class FinanceRepository @Inject constructor(
     private val debitDao: DebitEntryDao,
     private val creditDao: CreditEntryDao
 ) {

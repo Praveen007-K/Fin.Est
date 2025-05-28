@@ -8,9 +8,11 @@ import androidx.navigation.compose.*
 import androidx.compose.foundation.layout.*
 import com.example.finest.presentation.navigation.BottomNavigationBar
 import com.example.finest.presentation.navigation.NavigationGraph
+import com.example.finest.presentation.viewmodel.FinanceViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
-fun MainScreen() {
+fun MainScreen(viewModel: FinanceViewModel = hiltViewModel()) {
     val navController = rememberNavController()
 
     Scaffold(

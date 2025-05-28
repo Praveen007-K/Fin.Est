@@ -11,12 +11,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
     @Provides
+    @Singleton
     fun provideFinanceDatabase(@ApplicationContext context: Context): FinanceDatabase =
         Room.databaseBuilder(context, FinanceDatabase::class.java, "finance_db").build()
 
@@ -27,6 +29,7 @@ object AppModule {
     fun provideCreditEntryDao(database: FinanceDatabase): CreditEntryDao = database.creditEntryDao()
 
     @Provides
+    @Singleton
     fun provideFinanceRepository(
         debitDao: DebitEntryDao,
         creditDao: CreditEntryDao

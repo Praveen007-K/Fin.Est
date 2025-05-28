@@ -9,7 +9,7 @@ import com.example.finest.presentation.screens.HomeScreen
 import com.example.finest.presentation.screens.StatsScreen
 
 @Composable
-fun NavGraph(navController: NavHostController = rememberNavController()) {
+fun NavigationGraph(navController: NavHostController = rememberNavController()) {
     NavHost(navController, startDestination = NavRoutes.HOME) {
         composable(NavRoutes.HOME) { HomeScreen() }
         composable(NavRoutes.STATS) { StatsScreen() }
