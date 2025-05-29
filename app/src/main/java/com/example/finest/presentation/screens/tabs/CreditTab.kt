@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finest.data.local.entities.CreditEntryEntity
 import com.example.finest.presentation.components.AmountTextField
@@ -17,7 +18,7 @@ fun CreditScreen() {
     var amount by remember { mutableStateOf("") }
 
     val incomeSources = listOf("Salary", "Freelance", "Gift", "Other")
-    val viewModel: FinanceViewModel = viewModel()
+    val viewModel: FinanceViewModel = hiltViewModel()
 
     Column(Modifier.padding(16.dp)) {
         DropdownField("Income Source", incomeSources, incomeSource) {

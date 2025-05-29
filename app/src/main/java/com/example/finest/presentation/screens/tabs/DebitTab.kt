@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finest.data.local.entities.DebitEntryEntity
 import com.example.finest.presentation.components.DropdownField
@@ -24,7 +25,7 @@ fun DebitScreen() {
     val banks = listOf("SBI", "BOB", "HDFC")
 
 
-    val viewModel: FinanceViewModel = viewModel()
+    val viewModel: FinanceViewModel = hiltViewModel()
 
     Column(Modifier.padding(16.dp)) {
         DropdownField("Expense Category", categories, category) { category = it }

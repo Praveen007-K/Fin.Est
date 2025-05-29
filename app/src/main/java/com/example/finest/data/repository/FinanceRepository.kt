@@ -7,7 +7,9 @@ import com.example.finest.data.local.entities.DebitEntryEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class FinanceRepository @Inject constructor(
     private val debitDao: DebitEntryDao,
     private val creditDao: CreditEntryDao

@@ -6,6 +6,7 @@ import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finest.data.dummy.DummyData
 import com.example.finest.domain.model.CreditEntry
@@ -40,7 +41,7 @@ fun StatsScreen() {
 }
 @Composable
 fun CreditStatsTab() {
-    val viewModel: FinanceViewModel = viewModel()
+    val viewModel: FinanceViewModel = hiltViewModel()
     val credits by viewModel.credits.collectAsState()
     val total = credits.sumOf { it.amount }
     val grouped = credits.groupBy { it.source }

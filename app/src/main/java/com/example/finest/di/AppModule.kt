@@ -23,15 +23,17 @@ object AppModule {
         Room.databaseBuilder(context, FinanceDatabase::class.java, "finance_db").build()
 
     @Provides
+    @Singleton
     fun provideDebitEntryDao(database: FinanceDatabase): DebitEntryDao = database.debitEntryDao()
 
     @Provides
+    @Singleton
     fun provideCreditEntryDao(database: FinanceDatabase): CreditEntryDao = database.creditEntryDao()
 
-    @Provides
-    @Singleton
-    fun provideFinanceRepository(
-        debitDao: DebitEntryDao,
-        creditDao: CreditEntryDao
-    ): FinanceRepository = FinanceRepository(debitDao, creditDao)
+//    @Provides
+//    @Singleton
+//    fun provideFinanceRepository(
+//        debitDao: DebitEntryDao,
+//        creditDao: CreditEntryDao
+//    ): FinanceRepository = FinanceRepository(debitDao, creditDao)
 }
