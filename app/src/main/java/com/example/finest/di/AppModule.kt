@@ -5,7 +5,6 @@ import androidx.room.Room
 import com.example.finest.data.local.FinanceDatabase
 import com.example.finest.data.local.dao.CreditEntryDao
 import com.example.finest.data.local.dao.DebitEntryDao
-import com.example.finest.data.repository.FinanceRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
