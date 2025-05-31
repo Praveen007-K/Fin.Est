@@ -11,13 +11,19 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finest.data.dummy.DummyData
 import com.example.finest.domain.model.CreditEntry
 import com.example.finest.domain.model.DebitEntry
+import com.example.finest.presentation.screens.tabs.CreditStatsTab
+import com.example.finest.presentation.screens.tabs.DebitStatsTab
 import com.example.finest.presentation.viewmodel.FinanceViewModel
 
 @Composable
 fun StatsScreen() {
-    val tabs = listOf("Credit Stats", "Debit Stats")
+    val tabs = listOf("Debit Stats", "Credit Stats")
     var selectedTabIndex by remember { mutableStateOf(0) }
+    val viewModel: FinanceViewModel = hiltViewModel()
 
+    LaunchedEffect(Unit) {
+        viewModel.loadAllEntries()
+    }
 
 
     Column {
@@ -34,47 +40,13 @@ fun StatsScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         when (selectedTabIndex) {
-            0 -> CreditStatsTab()
-            1 -> DebitStatsTab()
-        }
-    }
-}
-@Composable
-fun CreditStatsTab() {
-    val viewModel: FinanceViewModel = hiltViewModel()
-    val credits by viewModel.credits.collectAsState()
-    val total = credits.sumOf { it.amount }
-    val grouped = credits.groupBy { it.source }
-        .mapValues { it.value.sumOf { entry -> entry.amount } }
-
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("💰 Total Credit: ₹${"%.2f".format(total)}", style = MaterialTheme.typography.headlineSmall)
-
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("📊 Breakdown by Source:", style = MaterialTheme.typography.titleMedium)
-        grouped.forEach { (source, amount) ->
-            Text("- $source: ₹${"%.2f".format(amount)}")
+            0 -> DebitStatsTab()
+            1 -> CreditStatsTab()
         }
     }
 }
 
 
 
-@Composable
-fun DebitStatsTab() {
-    val viewModel: FinanceViewModel = viewModel()
-    val debits by viewModel.debits.collectAsState()
-    val total = debits.sumOf { it.amount }
-    val grouped = debits.groupBy { it.category }
-        .mapValues { it.value.sumOf { entry -> entry.amount } }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text("💸 Total Debit: ₹${"%.2f".format(total)}", style = MaterialTheme.typography.headlineSmall)
 
-        Spacer(modifier = Modifier.height(16.dp))
-        Text("📊 Breakdown by Category:", style = MaterialTheme.typography.titleMedium)
-        grouped.forEach { (category, amount) ->
-            Text("- $category: ₹${"%.2f".format(amount)}")
-        }
-    }
-}

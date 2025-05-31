@@ -6,7 +6,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.finest.data.local.entities.CreditEntryEntity
 import com.example.finest.presentation.components.AmountTextField
 import com.example.finest.presentation.components.DropdownField
