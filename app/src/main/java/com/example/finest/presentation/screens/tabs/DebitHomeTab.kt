@@ -1,9 +1,11 @@
 package com.example.finest.presentation.screens.tabs
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.finest.data.local.entities.DebitEntryEntity
@@ -22,6 +24,7 @@ fun DebitScreen() {
     val categories = listOf("Housing", "Food", "Transport", "Utilities", "Dependents", "Entertainment", "Health", "Finance")
     val paymentMethods = listOf("UPI", "Cash", "Card", "Net Banking")
     val banks = listOf("SBI", "BOB", "HDFC")
+    val context = LocalContext.current
 
 
     val viewModel: FinanceViewModel = hiltViewModel()
@@ -53,15 +56,32 @@ fun DebitScreen() {
         Spacer(Modifier.height(16.dp))
 
         Button(onClick = {
-            viewModel.addDebit(
-                DebitEntryEntity(
-                    category = category,
-                    paymentMethod = paymentMethod,
-                    bank = bank,
-                    amount = amount.toDouble(),
-                    description = description
+            val dataNotEmpty : Boolean = category.isNotEmpty() && amount.isNotBlank() && paymentMethod.isNotEmpty() && bank.isNotEmpty();
+            if(dataNotEmpty){
+                viewModel.addDebit(
+                    DebitEntryEntity(
+                        category = category,
+                        paymentMethod = paymentMethod,
+                        bank = bank,
+                        amount = amount.toDouble(),
+                        description = description
+                    )
                 )
-            )
+
+                Toast.makeText(context, "Successfully added data.", Toast.LENGTH_SHORT).show()
+
+                //Clear fields after submit
+                category = ""
+                paymentMethod = ""
+                bank = ""
+                amount = ""
+                description = ""
+
+            }
+            else{
+                Toast.makeText(context, "Fields cannot be empty!", Toast.LENGTH_SHORT).show()
+            }
+
         }) {
             Text("Submit")
         }

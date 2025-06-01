@@ -3,6 +3,7 @@ package com.example.finest.presentation.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -15,7 +16,8 @@ data class BottomNavItem(val route: String, val icon: ImageVector, val label: St
 fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
         BottomNavItem(NavRoutes.HOME, Icons.Default.Home, "Home"),
-        BottomNavItem(NavRoutes.STATS, Icons.Default.Build, "Stats")
+        BottomNavItem(NavRoutes.STATS, Icons.Default.Build, "Stats"),
+        BottomNavItem(NavRoutes.ABOUT, Icons.Default.Info, "About")
     )
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry.value?.destination?.route

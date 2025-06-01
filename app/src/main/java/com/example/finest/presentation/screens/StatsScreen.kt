@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.finest.presentation.screens.tabs.CreditScreen
 import com.example.finest.presentation.screens.tabs.CreditStatsTab
+import com.example.finest.presentation.screens.tabs.DebitScreen
 import com.example.finest.presentation.screens.tabs.DebitStatsTab
 import com.example.finest.presentation.viewmodel.FinanceViewModel
 
@@ -21,23 +23,24 @@ fun StatsScreen() {
         viewModel.loadAllEntries()
     }
 
-
-    Column {
-        TabRow(selectedTabIndex = selectedTabIndex) {
-            tabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTabIndex == index,
-                    onClick = { selectedTabIndex = index },
-                    text = { Text(title) }
-                )
+    Scaffold(
+        topBar = {
+            TabRow(selectedTabIndex = selectedTabIndex) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTabIndex == index,
+                        onClick = { selectedTabIndex = index },
+                        text = { Text(title) }
+                    )
+                }
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        when (selectedTabIndex) {
-            0 -> DebitStatsTab()
-            1 -> CreditStatsTab()
+    ) { innerPadding ->
+        Box(modifier = Modifier.padding(innerPadding)) {
+            when (selectedTabIndex) {
+                0 -> DebitStatsTab()
+                1 -> CreditStatsTab()
+            }
         }
     }
 }

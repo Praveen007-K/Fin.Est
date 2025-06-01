@@ -25,8 +25,7 @@ fun HomeScreen() {
                 }
             }
         }
-    ) { innerPadding -> // ← receives PaddingValues
-        // Apply the padding to the screen content
+    ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             when (selectedTab) {
                 0 -> DebitScreen()
