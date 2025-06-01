@@ -5,11 +5,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.finest.presentation.screens.tabs.CreditScreen
 import com.example.finest.presentation.screens.tabs.CreditStatsTab
-import com.example.finest.presentation.screens.tabs.DebitScreen
 import com.example.finest.presentation.screens.tabs.DebitStatsTab
 import com.example.finest.presentation.viewmodel.FinanceViewModel
 
