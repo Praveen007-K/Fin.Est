@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "630008815266",
+    "project_id": "finest-321e6",
+    "storage_bucket": "finest-321e6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:630008815266:android:9ce9a66dd4dc332488c1fb",
+        "android_client_info": {
+          "package_name": "com.pkoder.finest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDU0zAG5N-2_Fo5-wCcfFZF5Ep1N7-5zUo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

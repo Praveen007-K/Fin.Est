@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.finest">
+    package="com.pkoder.finest">
 
     <application
         android:name=".App"
@@ -16,7 +16,7 @@
         android:theme="@style/Theme.FinEst"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name="com.pkoder.finest.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.FinEst">

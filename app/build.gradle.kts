@@ -4,16 +4,17 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.google.services)
 
     id("kotlin-kapt")
 }
 
 android {
-    namespace = "com.example.finest"
+    namespace = "com.pkoder.finest"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.finest"
+        applicationId = "com.pkoder.finest"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -103,6 +104,10 @@ dependencies {
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
+
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
 
 }
 
