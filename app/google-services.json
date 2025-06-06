@@ -12,7 +12,20 @@
           "package_name": "com.pkoder.finest"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "630008815266-asgvf7ilomie6nsbqr3mllt2m4jpgsrs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.pkoder.finest",
+            "certificate_hash": "2e2bcdb969315165d34aab1d273131f10555ca71"
+          }
+        },
+        {
+          "client_id": "630008815266-g05gdqaj256ugm8osos6om0mg2e23k5d.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDU0zAG5N-2_Fo5-wCcfFZF5Ep1N7-5zUo"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "630008815266-g05gdqaj256ugm8osos6om0mg2e23k5d.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
