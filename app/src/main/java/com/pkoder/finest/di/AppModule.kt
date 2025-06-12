@@ -2,6 +2,8 @@ package com.pkoder.finest.di
 
 import android.content.Context
 import androidx.room.Room
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.pkoder.finest.data.local.FinanceDatabase
 import com.pkoder.finest.data.local.dao.CreditEntryDao
 import com.pkoder.finest.data.local.dao.DebitEntryDao
@@ -28,6 +30,12 @@ object AppModule {
     @Provides
     @Singleton
     fun provideCreditEntryDao(database: FinanceDatabase): CreditEntryDao = database.creditEntryDao()
+
+    @Provides
+    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
+
+    @Provides
+    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
 
 //    @Provides
 //    @Singleton
