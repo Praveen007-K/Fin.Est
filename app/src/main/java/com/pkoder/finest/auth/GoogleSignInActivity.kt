@@ -27,33 +27,32 @@ class GoogleSignInActivity : AppCompatActivity()  {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Instantiate a Google sign-in request
+        auth = Firebase.auth
+    }
+
+    private fun startGoogleSignInFlow() {
         val googleIdOption = GetGoogleIdOption.Builder()
-            // Your server's client ID, not your Android client ID.
             .setServerClientId(getString(R.string.web_client_id))
-            // Only show accounts previously used to sign in.
-            .setFilterByAuthorizedAccounts(true)
+            .setFilterByAuthorizedAccounts(false) // set to false to allow new account selection
             .build()
 
-        // Create the Credential Manager request
         val request = GetCredentialRequest.Builder()
             .addCredentialOption(googleIdOption)
             .build()
-        // Initialize Firebase Auth
-        auth = Firebase.auth
 
         lifecycleScope.launch {
             try {
                 val result = credentialManager.getCredential(this@GoogleSignInActivity, request)
-                val credential = result.credential // ✅ Extract actual Credential
+                val credential = result.credential
                 handleSignIn(credential)
             } catch (e: Exception) {
                 Log.e(TAG, "Google Sign-In failed: ${e.localizedMessage}")
+                Toast.makeText(this@GoogleSignInActivity, "Sign-in failed", Toast.LENGTH_SHORT).show()
+                finish() // Exit the activity if sign-in fails
             }
         }
-
-
     }
+
 
     private fun handleSignIn(credential: Credential) {
         // Check if credential is of type Google ID
@@ -108,9 +107,13 @@ class GoogleSignInActivity : AppCompatActivity()  {
 
     override fun onStart() {
         super.onStart()
-        // Check if user is signed in (non-null) and update UI accordingly.
         val currentUser = auth.currentUser
-        updateUI(currentUser)
+
+        if (currentUser != null) {
+            updateUI(currentUser)
+        } else {
+            startGoogleSignInFlow()
+        }
     }
 
     private fun updateUI(currentUser: FirebaseUser?) {
@@ -120,6 +123,7 @@ class GoogleSignInActivity : AppCompatActivity()  {
             // startActivity(Intent(this, MainActivity::class.java))
         } else {
             Toast.makeText(this, "Not signed in", Toast.LENGTH_SHORT).show()
+            finish()
         }
     }
 

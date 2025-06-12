@@ -1,5 +1,6 @@
 package com.pkoder.finest.presentation.screens.tabs
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -8,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.pkoder.finest.auth.GoogleSignInActivity
 import com.pkoder.finest.data.local.entities.DebitEntryEntity
 import com.pkoder.finest.presentation.components.DropdownField
 import com.pkoder.finest.presentation.components.AmountTextField
@@ -85,5 +87,11 @@ fun DebitScreen() {
         }) {
             Text("Submit")
         }
+        Button(onClick = {
+            context.startActivity(Intent(context, GoogleSignInActivity::class.java))
+        }) {
+            Text("Sign In with Google")
+        }
+
     }
 }

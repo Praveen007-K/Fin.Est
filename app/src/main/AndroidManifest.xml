@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.pkoder.finest">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".App"
 
@@ -26,6 +28,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".auth.GoogleSignInActivity"
+            android:theme="@style/Theme.FinEstTest"
+        />
     </application>
 
 </manifest>
