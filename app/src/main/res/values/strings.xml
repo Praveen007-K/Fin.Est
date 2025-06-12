@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Fin.Est</string>
+
+<!--    AUTH-->
+    <string name="web_client_id">630008815266-g05gdqaj256ugm8osos6om0mg2e23k5d.apps.googleusercontent.com</string>
+
 </resources>
