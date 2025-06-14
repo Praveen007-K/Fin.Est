@@ -32,8 +32,8 @@ class GoogleSignInActivity : AppCompatActivity()  {
 
     private fun startGoogleSignInFlow() {
         val googleIdOption = GetGoogleIdOption.Builder()
-            .setServerClientId(getString(R.string.web_client_id))
             .setFilterByAuthorizedAccounts(false) // set to false to allow new account selection
+            .setServerClientId(getString(R.string.web_client_id))
             .build()
 
         val request = GetCredentialRequest.Builder()
