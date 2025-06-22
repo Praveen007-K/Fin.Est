@@ -31,16 +31,4 @@ object AppModule {
     @Singleton
     fun provideCreditEntryDao(database: FinanceDatabase): CreditEntryDao = database.creditEntryDao()
 
-    @Provides
-    fun provideFirebaseAuth(): FirebaseAuth = FirebaseAuth.getInstance()
-
-    @Provides
-    fun provideFirebaseFirestore(): FirebaseFirestore = FirebaseFirestore.getInstance()
-
-//    @Provides
-//    @Singleton
-//    fun provideFinanceRepository(
-//        debitDao: DebitEntryDao,
-//        creditDao: CreditEntryDao
-//    ): FinanceRepository = FinanceRepository(debitDao, creditDao)
 }
