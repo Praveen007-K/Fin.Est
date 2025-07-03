@@ -5,12 +5,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.pkoder.finest.presentation.screens.AboutScreen
 import com.pkoder.finest.presentation.screens.HomeScreen
 import com.pkoder.finest.auth.presentation.ui.SignInScreen
 import com.pkoder.finest.presentation.screens.StatsScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.pkoder.finest.auth.presentation.viewmodel.AuthViewModel
+import com.pkoder.finest.presentation.screens.AboutScreen
 
 @Composable
 fun NavigationGraph(navController: NavHostController = rememberNavController()) {
