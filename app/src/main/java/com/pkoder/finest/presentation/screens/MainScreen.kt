@@ -1,19 +1,17 @@
-// MainScreen.kt
 package com.pkoder.finest.presentation.screens
 
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Scaffold
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.rememberNavController
+import com.pkoder.finest.presentation.navigation.AppDrawer
 import com.pkoder.finest.presentation.navigation.BottomNavigationBar
 import com.pkoder.finest.presentation.navigation.NavigationGraph
 import com.pkoder.finest.presentation.viewmodel.FinanceViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.pkoder.finest.presentation.navigation.AppDrawer
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

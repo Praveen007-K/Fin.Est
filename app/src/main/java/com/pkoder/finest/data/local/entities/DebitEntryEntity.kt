@@ -6,10 +6,11 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "debit_entries")
 data class DebitEntryEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val category: String,
-    val paymentMethod: String,
-    val bank: String,
-    val amount: Double,
-    val description: String?,
+    val category: String = "",
+    val paymentMethod: String = "",
+    val bank: String = "",
+    val amount: Double = 0.0,
+    val description: String? = null,
     val timestamp: Long = System.currentTimeMillis()
 )
+
