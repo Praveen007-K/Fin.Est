@@ -110,6 +110,8 @@ dependencies {
     implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
 }
 
 kapt {
