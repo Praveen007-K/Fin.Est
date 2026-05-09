@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "debit_entries")
 data class DebitEntryEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey val firestoreId: String = "",
     val category: String = "",
     val paymentMethod: String = "",
     val bank: String = "",
@@ -13,4 +13,3 @@ data class DebitEntryEntity(
     val description: String? = null,
     val timestamp: Long = System.currentTimeMillis()
 )
-

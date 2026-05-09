@@ -1,54 +1,54 @@
 package com.pkoder.finest.presentation.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import com.pkoder.finest.R
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.pkoder.finest.auth.data.repository.AuthResult
+import com.pkoder.finest.auth.presentation.viewmodel.AuthViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen() {
-    Box(
+fun AboutScreen(
+    onSignOut: () -> Unit = {}
+) {
+    val authViewModel: AuthViewModel = hiltViewModel()
+    val authState by authViewModel.authState.collectAsState()
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(32.dp),
-        contentAlignment = Alignment.Center
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("Fin.Est", style = MaterialTheme.typography.headlineLarge)
+            Spacer(Modifier.height(8.dp))
+            Text("Personal Finance Tracker", style = MaterialTheme.typography.bodyMedium)
+            Spacer(Modifier.height(4.dp))
+            Text("Version 1.0", style = MaterialTheme.typography.bodySmall)
+
+            // Show logged in user
+            if (authState is AuthResult.Success) {
+                Spacer(Modifier.height(16.dp))
+                val user = (authState as AuthResult.Success).userData
+                Text("Logged in as:", style = MaterialTheme.typography.labelSmall)
+                Text(user.email, style = MaterialTheme.typography.bodyMedium)
+            }
+        }
+
+        // Logout button at bottom
+        Button(
+            onClick = onSignOut,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error
+            ),
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_app_logo),
-                contentDescription = "App Icon",
-                modifier = Modifier.size(64.dp)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                text = "FinEst App",
-                style = MaterialTheme.typography.headlineSmall
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "Version: 1.0.0",
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Text("Sign Out")
         }
     }
 }

@@ -18,7 +18,6 @@ class FinanceRepository @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val auth: FirebaseAuth
 ) {
-
     companion object {
         private const val USERS_COLLECTION = "users"
         private const val DEBIT_ENTRIES_COLLECTION = "debit_entries"
@@ -27,65 +26,79 @@ class FinanceRepository @Inject constructor(
     }
 
     private fun getUserDocument() = auth.currentUser?.uid?.let {
-        Log.d(TAG, "Current user UID: $it")
         firestore.collection(USERS_COLLECTION).document(it)
-    } ?: run { Log.d(TAG, "Current user is null."); null }
+    } ?: run { Log.d(TAG, "User is null"); null }
 
     suspend fun insertDebit(debitEntry: DebitEntryEntity) {
-        Log.d(TAG, "Attempting to insert debit to Firestore.")
         try {
-            getUserDocument()?.collection(DEBIT_ENTRIES_COLLECTION)?.add(debitEntry)?.await()
-            Log.d(TAG, "Debit successfully added to Firestore.")
+            val docRef = getUserDocument()
+                ?.collection(DEBIT_ENTRIES_COLLECTION)
+                ?.add(debitEntry)
+                ?.await()
+            // Save to Room with Firestore doc ID to prevent duplicates
+            val entryWithId = debitEntry.copy(firestoreId = docRef?.id ?: "")
+            debitDao.insert(entryWithId)
+            Log.d(TAG, "Debit inserted with ID: ${docRef?.id}")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to add debit to Firestore: ${e.message}", e)
+            Log.e(TAG, "Failed to insert debit: ${e.message}", e)
+            // Still save locally even if Firestore fails
+            debitDao.insert(debitEntry.copy(firestoreId = "local_${System.currentTimeMillis()}"))
         }
-        debitDao.insert(debitEntry)
     }
 
     suspend fun insertCredit(creditEntry: CreditEntryEntity) {
-        Log.d(TAG, "Attempting to insert credit to Firestore.")
         try {
-            getUserDocument()?.collection(CREDIT_ENTRIES_COLLECTION)?.add(creditEntry)?.await()
-            Log.d(TAG, "Credit successfully added to Firestore.")
+            val docRef = getUserDocument()
+                ?.collection(CREDIT_ENTRIES_COLLECTION)
+                ?.add(creditEntry)
+                ?.await()
+            val entryWithId = creditEntry.copy(firestoreId = docRef?.id ?: "")
+            creditDao.insert(entryWithId)
+            Log.d(TAG, "Credit inserted with ID: ${docRef?.id}")
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to add credit to Firestore: ${e.message}", e)
+            Log.e(TAG, "Failed to insert credit: ${e.message}", e)
+            creditDao.insert(creditEntry.copy(firestoreId = "local_${System.currentTimeMillis()}"))
         }
-        creditDao.insert(creditEntry)
     }
 
     suspend fun getAllDebits(): List<DebitEntryEntity> {
-        Log.d(TAG, "Attempting to get all debits from Firestore.")
         val userDoc = getUserDocument()
         if (userDoc != null) {
             try {
                 val snapshot = userDoc.collection(DEBIT_ENTRIES_COLLECTION).get().await()
-                val debits = snapshot.toObjects(DebitEntryEntity::class.java)
+                // Map Firestore doc ID into each entity before inserting
+                val debits = snapshot.documents.mapNotNull { doc ->
+                    doc.toObject(DebitEntryEntity::class.java)?.copy(firestoreId = doc.id)
+                }
                 debitDao.insertAll(debits)
-                Log.d(TAG, "Debits successfully fetched from Firestore and inserted into local DB.")
+                Log.d(TAG, "Fetched ${debits.size} debits from Firestore")
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to get debits from Firestore: ${e.message}", e)
+                Log.e(TAG, "Failed to fetch debits: ${e.message}", e)
             }
-        } else {
-            Log.d(TAG, "Cannot get debits from Firestore: User document is null.")
         }
         return debitDao.getAllDebits()
     }
 
     suspend fun getAllCredits(): List<CreditEntryEntity> {
-        Log.d(TAG, "Attempting to get all credits from Firestore.")
         val userDoc = getUserDocument()
         if (userDoc != null) {
             try {
                 val snapshot = userDoc.collection(CREDIT_ENTRIES_COLLECTION).get().await()
-                val credits = snapshot.toObjects(CreditEntryEntity::class.java)
+                val credits = snapshot.documents.mapNotNull { doc ->
+                    doc.toObject(CreditEntryEntity::class.java)?.copy(firestoreId = doc.id)
+                }
                 creditDao.insertAll(credits)
-                Log.d(TAG, "Credits successfully fetched from Firestore and inserted into local DB.")
+                Log.d(TAG, "Fetched ${credits.size} credits from Firestore")
             } catch (e: Exception) {
-                Log.e(TAG, "Failed to get credits from Firestore: ${e.message}", e)
+                Log.e(TAG, "Failed to fetch credits: ${e.message}", e)
             }
-        } else {
-            Log.d(TAG, "Cannot get credits from Firestore: User document is null.")
         }
         return creditDao.getAllCredits()
+    }
+
+    suspend fun clearLocalData() {
+        debitDao.clearAll()
+        creditDao.clearAll()
+        Log.d(TAG, "Local data cleared")
     }
 }

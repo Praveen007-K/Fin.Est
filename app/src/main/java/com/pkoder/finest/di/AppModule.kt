@@ -21,7 +21,9 @@ object AppModule {
     @Provides
     @Singleton
     fun provideFinanceDatabase(@ApplicationContext context: Context): FinanceDatabase =
-        Room.databaseBuilder(context, FinanceDatabase::class.java, "finance_db").build()
+        Room.databaseBuilder(context, FinanceDatabase::class.java, "finance_db")
+            .fallbackToDestructiveMigration(dropAllTables = true)
+            .build()
 
     @Provides
     @Singleton
@@ -30,5 +32,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideCreditEntryDao(database: FinanceDatabase): CreditEntryDao = database.creditEntryDao()
+
+
 
 }

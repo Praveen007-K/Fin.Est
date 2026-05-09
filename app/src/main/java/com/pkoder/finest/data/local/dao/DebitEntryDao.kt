@@ -16,4 +16,7 @@ interface DebitEntryDao {
 
     @Query("SELECT * FROM debit_entries ORDER BY timestamp DESC")
     suspend fun getAllDebits(): List<DebitEntryEntity>
+
+    @Query("DELETE FROM debit_entries")
+    suspend fun clearAll()
 }

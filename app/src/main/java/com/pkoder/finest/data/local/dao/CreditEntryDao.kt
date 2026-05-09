@@ -16,4 +16,7 @@ interface CreditEntryDao {
 
     @Query("SELECT * FROM credit_entries ORDER BY timestamp DESC")
     suspend fun getAllCredits(): List<CreditEntryEntity>
+
+    @Query("DELETE FROM credit_entries")
+    suspend fun clearAll()
 }

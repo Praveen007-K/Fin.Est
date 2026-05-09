@@ -105,6 +105,10 @@ dependencies {
     implementation(libs.google.auth)
     implementation(libs.googleid)
 
+    // Google Credential Manager (required for SignInScreen on Android 13+)
+    implementation("androidx.credentials:credentials:1.2.2")
+    implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
+    implementation("com.google.android.gms:play-services-auth:21.0.0")
 
 }
 

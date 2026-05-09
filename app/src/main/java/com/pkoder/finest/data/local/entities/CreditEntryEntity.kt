@@ -5,9 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "credit_entries")
 data class CreditEntryEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey val firestoreId: String = "",
     val source: String = "",
     val amount: Double = 0.0,
     val timestamp: Long = System.currentTimeMillis()
 )
-

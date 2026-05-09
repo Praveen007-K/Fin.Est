@@ -2,31 +2,36 @@ package com.pkoder.finest.presentation.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.pkoder.finest.presentation.navigation.AppDrawer
 import com.pkoder.finest.presentation.navigation.BottomNavigationBar
 import com.pkoder.finest.presentation.navigation.NavigationGraph
+import com.pkoder.finest.presentation.navigation.NavRoutes
 import com.pkoder.finest.presentation.viewmodel.FinanceViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: FinanceViewModel = hiltViewModel()) {
     val navController = rememberNavController()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
 
-    AppDrawer {
-        Scaffold(
-            bottomBar = {
+    // Only show bottom nav when user is logged in
+    val showBottomBar = currentRoute != NavRoutes.SIGN_IN
+
+    Scaffold(
+        bottomBar = {
+            if (showBottomBar) {
                 BottomNavigationBar(navController)
             }
-        ) { padding ->
-            Box(modifier = Modifier.padding(padding)) {
-                NavigationGraph(navController)
-            }
+        }
+    ) { padding ->
+        Box(modifier = Modifier.padding(padding)) {
+            NavigationGraph(navController)
         }
     }
 }

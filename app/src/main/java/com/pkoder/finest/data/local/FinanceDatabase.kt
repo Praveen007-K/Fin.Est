@@ -9,7 +9,7 @@ import com.pkoder.finest.data.local.entities.DebitEntryEntity
 
 @Database(
     entities = [DebitEntryEntity::class, CreditEntryEntity::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class FinanceDatabase : RoomDatabase() {
