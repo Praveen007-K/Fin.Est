@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import com.pkoder.finest.data.local.entities.DebitEntryEntity
 
 @Dao
@@ -19,4 +20,10 @@ interface DebitEntryDao {
 
     @Query("DELETE FROM debit_entries")
     suspend fun clearAll()
+
+    @Update
+    suspend fun update(debitEntry: DebitEntryEntity)
+
+    @Query("DELETE FROM debit_entries WHERE firestoreId = :id")
+    suspend fun deleteById(id: String)
 }

@@ -1,10 +1,14 @@
 package com.pkoder.finest.presentation.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavController
@@ -17,7 +21,9 @@ fun BottomNavigationBar(navController: NavController) {
     val items = listOf(
         BottomNavItem(NavRoutes.HOME, Icons.Default.Home, "Home"),
         BottomNavItem(NavRoutes.STATS, Icons.Default.Build, "Stats"),
+        BottomNavItem(NavRoutes.HISTORY, Icons.AutoMirrored.Filled.List, "History"),
         BottomNavItem(NavRoutes.ABOUT, Icons.Default.Info, "About")
+
     )
     val navBackStackEntry = navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry.value?.destination?.route

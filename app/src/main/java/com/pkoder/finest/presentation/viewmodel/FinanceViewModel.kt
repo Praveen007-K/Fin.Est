@@ -42,5 +42,33 @@ class FinanceViewModel @Inject constructor(
             loadAllEntries()
         }
     }
+
+    fun deleteDebit(firestoreId: String) {
+        viewModelScope.launch {
+            repository.deleteDebit(firestoreId)
+            loadAllEntries()
+        }
+    }
+
+    fun deleteCredit(firestoreId: String) {
+        viewModelScope.launch {
+            repository.deleteCredit(firestoreId)
+            loadAllEntries()
+        }
+    }
+
+    fun updateDebit(debitEntry: DebitEntryEntity) {
+        viewModelScope.launch {
+            repository.updateDebit(debitEntry)
+            loadAllEntries()
+        }
+    }
+
+    fun updateCredit(creditEntry: CreditEntryEntity) {
+        viewModelScope.launch {
+            repository.updateCredit(creditEntry)
+            loadAllEntries()
+        }
+    }
 }
 

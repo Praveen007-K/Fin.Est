@@ -96,6 +96,66 @@ class FinanceRepository @Inject constructor(
         return creditDao.getAllCredits()
     }
 
+    suspend fun deleteDebit(firestoreId: String) {
+        try {
+            getUserDocument()
+                ?.collection(DEBIT_ENTRIES_COLLECTION)
+                ?.document(firestoreId)
+                ?.delete()
+                ?.await()
+            Log.d(TAG, "Debit deleted from Firestore: $firestoreId")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to delete debit from Firestore: ${e.message}", e)
+        } finally {
+            debitDao.deleteById(firestoreId)
+        }
+    }
+
+    suspend fun deleteCredit(firestoreId: String) {
+        try {
+            getUserDocument()
+                ?.collection(CREDIT_ENTRIES_COLLECTION)
+                ?.document(firestoreId)
+                ?.delete()
+                ?.await()
+            Log.d(TAG, "Credit deleted from Firestore: $firestoreId")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to delete credit from Firestore: ${e.message}", e)
+        } finally {
+            creditDao.deleteById(firestoreId)
+        }
+    }
+
+    suspend fun updateDebit(debitEntry: DebitEntryEntity) {
+        try {
+            getUserDocument()
+                ?.collection(DEBIT_ENTRIES_COLLECTION)
+                ?.document(debitEntry.firestoreId)
+                ?.set(debitEntry)
+                ?.await()
+            Log.d(TAG, "Debit updated in Firestore: ${debitEntry.firestoreId}")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update debit in Firestore: ${e.message}", e)
+        } finally {
+            debitDao.update(debitEntry)
+        }
+    }
+
+    suspend fun updateCredit(creditEntry: CreditEntryEntity) {
+        try {
+            getUserDocument()
+                ?.collection(CREDIT_ENTRIES_COLLECTION)
+                ?.document(creditEntry.firestoreId)
+                ?.set(creditEntry)
+                ?.await()
+            Log.d(TAG, "Credit updated in Firestore: ${creditEntry.firestoreId}")
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to update credit in Firestore: ${e.message}", e)
+        } finally {
+            creditDao.update(creditEntry)
+        }
+    }
+
     suspend fun clearLocalData() {
         debitDao.clearAll()
         creditDao.clearAll()

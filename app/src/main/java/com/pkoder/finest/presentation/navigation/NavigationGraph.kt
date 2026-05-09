@@ -11,6 +11,7 @@ import com.pkoder.finest.auth.data.repository.AuthResult
 import com.pkoder.finest.auth.presentation.ui.SignInScreen
 import com.pkoder.finest.auth.presentation.viewmodel.AuthViewModel
 import com.pkoder.finest.presentation.screens.AboutScreen
+import com.pkoder.finest.presentation.screens.HistoryScreen
 import com.pkoder.finest.presentation.screens.HomeScreen
 import com.pkoder.finest.presentation.screens.StatsScreen
 
@@ -41,6 +42,7 @@ fun NavigationGraph(
         }
         composable(NavRoutes.HOME) { HomeScreen() }
         composable(NavRoutes.STATS) { StatsScreen() }
+        composable(NavRoutes.HISTORY) { HistoryScreen() }
         composable(NavRoutes.ABOUT) {
             AboutScreen(
                 onSignOut = {
