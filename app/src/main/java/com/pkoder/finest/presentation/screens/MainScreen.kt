@@ -13,9 +13,13 @@ import com.pkoder.finest.presentation.navigation.BottomNavigationBar
 import com.pkoder.finest.presentation.navigation.NavigationGraph
 import com.pkoder.finest.presentation.navigation.NavRoutes
 import com.pkoder.finest.presentation.viewmodel.FinanceViewModel
+import com.pkoder.finest.presentation.viewmodel.SmsViewModel
 
 @Composable
-fun MainScreen(viewModel: FinanceViewModel = hiltViewModel()) {
+fun MainScreen(
+    viewModel: FinanceViewModel = hiltViewModel(),
+    smsViewModel: SmsViewModel = hiltViewModel()   // hoisted so all children share one instance
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -26,12 +30,12 @@ fun MainScreen(viewModel: FinanceViewModel = hiltViewModel()) {
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                BottomNavigationBar(navController)
+                BottomNavigationBar(navController, smsViewModel)
             }
         }
     ) { padding ->
         Box(modifier = Modifier.padding(padding)) {
-            NavigationGraph(navController)
+            NavigationGraph(navController, smsViewModel = smsViewModel)
         }
     }
 }

@@ -6,4 +6,5 @@ object NavRoutes {
     const val ABOUT = "about"
     const val SIGN_IN = "sign_in"
     const val HISTORY = "history"
+    const val REVIEW = "review"
 }

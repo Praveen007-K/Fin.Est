@@ -1,4 +1,4 @@
-package com.pkoder.finest.domain
+package com.pkoder.finest.domain.model
 
 import java.util.UUID
 

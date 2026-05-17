@@ -13,12 +13,15 @@ import com.pkoder.finest.auth.presentation.viewmodel.AuthViewModel
 import com.pkoder.finest.presentation.screens.AboutScreen
 import com.pkoder.finest.presentation.screens.HistoryScreen
 import com.pkoder.finest.presentation.screens.HomeScreen
+import com.pkoder.finest.presentation.screens.ReviewScreen
 import com.pkoder.finest.presentation.screens.StatsScreen
+import com.pkoder.finest.presentation.viewmodel.SmsViewModel
 
 @Composable
 fun NavigationGraph(
     navController: NavHostController,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    smsViewModel: SmsViewModel
 ) {
     val authState by authViewModel.authState.collectAsState()
 
@@ -42,6 +45,7 @@ fun NavigationGraph(
         }
         composable(NavRoutes.HOME) { HomeScreen() }
         composable(NavRoutes.STATS) { StatsScreen() }
+        composable(NavRoutes.REVIEW) { ReviewScreen(smsViewModel) }
         composable(NavRoutes.HISTORY) { HistoryScreen() }
         composable(NavRoutes.ABOUT) {
             AboutScreen(
