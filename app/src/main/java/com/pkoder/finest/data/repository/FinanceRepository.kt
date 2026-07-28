@@ -5,8 +5,12 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.pkoder.finest.data.local.dao.CreditEntryDao
 import com.pkoder.finest.data.local.dao.DebitEntryDao
+import com.pkoder.finest.data.local.dao.PendingTransactionDao
 import com.pkoder.finest.data.local.entities.CreditEntryEntity
 import com.pkoder.finest.data.local.entities.DebitEntryEntity
+import com.pkoder.finest.data.local.entities.PendingTransactionEntity
+import com.pkoder.finest.domain.model.PendingTransaction
+import com.pkoder.finest.domain.model.TransactionType
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -15,6 +19,7 @@ import javax.inject.Singleton
 class FinanceRepository @Inject constructor(
     private val debitDao: DebitEntryDao,
     private val creditDao: CreditEntryDao,
+    private val pendingDao: PendingTransactionDao,
     private val firestore: FirebaseFirestore,
     private val auth: FirebaseAuth
 ) {
@@ -160,5 +165,45 @@ class FinanceRepository @Inject constructor(
         debitDao.clearAll()
         creditDao.clearAll()
         Log.d(TAG, "Local data cleared")
+    }
+
+    // ── Pending Transactions ──────────────────────────────────────────────────
+
+    suspend fun insertPending(transaction: PendingTransaction) {
+        pendingDao.insert(
+            PendingTransactionEntity(
+                id = transaction.id,
+                type = transaction.type.name,
+                amount = transaction.amount,
+                bank = transaction.bank,
+                paymentMethod = transaction.paymentMethod,
+                category = transaction.category,
+                source = transaction.source,
+                description = transaction.description,
+                timestamp = transaction.timestamp,
+                rawSms = transaction.rawSms
+            )
+        )
+    }
+
+    suspend fun getAllPending(): List<PendingTransaction> {
+        return pendingDao.getAll().map { entity ->
+            PendingTransaction(
+                id = entity.id,
+                type = TransactionType.valueOf(entity.type),
+                amount = entity.amount,
+                bank = entity.bank,
+                paymentMethod = entity.paymentMethod,
+                category = entity.category,
+                source = entity.source,
+                description = entity.description,
+                timestamp = entity.timestamp,
+                rawSms = entity.rawSms
+            )
+        }
+    }
+
+    suspend fun deletePending(id: String) {
+        pendingDao.deleteById(id)
     }
 }

@@ -21,12 +21,16 @@ class SmsViewModel @Inject constructor(
     private val _pendingTransactions = MutableStateFlow<List<PendingTransaction>>(emptyList())
     val pendingTransactions: StateFlow<List<PendingTransaction>> = _pendingTransactions
 
-    fun addPending(transaction: PendingTransaction) {
-        // Avoid duplicates by checking amount + timestamp proximity
-        val exists = _pendingTransactions.value.any {
-            it.amount == transaction.amount &&
-                    Math.abs(it.timestamp - transaction.timestamp) < 5000
+    init {
+        // Load any pending transactions that were saved while the app was closed
+        viewModelScope.launch {
+            _pendingTransactions.value = repository.getAllPending()
         }
+    }
+
+    fun addPending(transaction: PendingTransaction) {
+        // Avoid duplicates by ID (DB already deduplicates via IGNORE, this covers the live callback)
+        val exists = _pendingTransactions.value.any { it.id == transaction.id }
         if (!exists) {
             _pendingTransactions.value = _pendingTransactions.value + transaction
         }
@@ -58,12 +62,18 @@ class SmsViewModel @Inject constructor(
     }
 
     fun dismiss(id: String) {
-        _pendingTransactions.value = _pendingTransactions.value.filter { it.id != id }
+        viewModelScope.launch {
+            repository.deletePending(id)  // Remove from DB
+            _pendingTransactions.value = _pendingTransactions.value.filter { it.id != id }
+        }
     }
 
     fun dismissAll() {
-        _pendingTransactions.value = emptyList()
+        viewModelScope.launch {
+            _pendingTransactions.value.forEach { repository.deletePending(it.id) }
+            _pendingTransactions.value = emptyList()
+        }
     }
 
     val pendingCount: Int get() = _pendingTransactions.value.size
-}
+}

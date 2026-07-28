@@ -7,6 +7,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.pkoder.finest.data.local.FinanceDatabase
 import com.pkoder.finest.data.local.dao.CreditEntryDao
 import com.pkoder.finest.data.local.dao.DebitEntryDao
+import com.pkoder.finest.data.local.dao.PendingTransactionDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -33,6 +34,8 @@ object AppModule {
     @Singleton
     fun provideCreditEntryDao(database: FinanceDatabase): CreditEntryDao = database.creditEntryDao()
 
-
+    @Provides
+    @Singleton
+    fun providePendingTransactionDao(database: FinanceDatabase): PendingTransactionDao = database.pendingTransactionDao()
 
 }
