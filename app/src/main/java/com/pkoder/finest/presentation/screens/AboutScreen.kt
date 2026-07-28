@@ -29,7 +29,7 @@ fun AboutScreen(
             Spacer(Modifier.height(8.dp))
             Text("Personal Finance Tracker", style = MaterialTheme.typography.bodyMedium)
             Spacer(Modifier.height(4.dp))
-            Text("Version 1.0", style = MaterialTheme.typography.bodySmall)
+            Text("Version 2.0", style = MaterialTheme.typography.bodySmall)
 
             // Show logged in user
             if (authState is AuthResult.Success) {
