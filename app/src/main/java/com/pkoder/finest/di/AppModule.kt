@@ -2,9 +2,8 @@ package com.pkoder.finest.di
 
 import android.content.Context
 import androidx.room.Room
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.pkoder.finest.data.local.FinanceDatabase
+import com.pkoder.finest.data.local.MIGRATION_3_4
 import com.pkoder.finest.data.local.dao.CreditEntryDao
 import com.pkoder.finest.data.local.dao.DebitEntryDao
 import com.pkoder.finest.data.local.dao.PendingTransactionDao
@@ -13,6 +12,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
 @Module
@@ -23,8 +25,20 @@ object AppModule {
     @Singleton
     fun provideFinanceDatabase(@ApplicationContext context: Context): FinanceDatabase =
         Room.databaseBuilder(context, FinanceDatabase::class.java, "finance_db")
-            .fallbackToDestructiveMigration(dropAllTables = true)
+            // Real migrations only — a destructive fallback would silently drop entries that
+            // exist offline plus the whole pending-SMS queue.
+            .addMigrations(MIGRATION_3_4)
             .build()
+
+    /**
+     * Lives as long as the process. Used by broadcast receivers, which have no lifecycle of
+     * their own and must not leak work into a scope that dies with onReceive().
+     */
+    @Provides
+    @Singleton
+    @ApplicationScope
+    fun provideApplicationScope(): CoroutineScope =
+        CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @Provides
     @Singleton

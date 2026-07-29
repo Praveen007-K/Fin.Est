@@ -1,5 +1,6 @@
 package com.pkoder.finest.presentation.navigation
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -11,17 +12,23 @@ import com.pkoder.finest.auth.data.repository.AuthResult
 import com.pkoder.finest.auth.presentation.ui.SignInScreen
 import com.pkoder.finest.auth.presentation.viewmodel.AuthViewModel
 import com.pkoder.finest.presentation.screens.AboutScreen
+import com.pkoder.finest.presentation.screens.DashboardScreen
 import com.pkoder.finest.presentation.screens.HistoryScreen
-import com.pkoder.finest.presentation.screens.HomeScreen
 import com.pkoder.finest.presentation.screens.ReviewScreen
 import com.pkoder.finest.presentation.screens.StatsScreen
+import com.pkoder.finest.presentation.viewmodel.FinanceViewModel
 import com.pkoder.finest.presentation.viewmodel.SmsViewModel
 
 @Composable
 fun NavigationGraph(
     navController: NavHostController,
-    authViewModel: AuthViewModel = hiltViewModel(),
-    smsViewModel: SmsViewModel
+    // Hoisted by MainScreen: every destination shares one instance, so data written on one screen
+    // is visible on the others without a reload.
+    financeViewModel: FinanceViewModel,
+    smsViewModel: SmsViewModel,
+    snackbarHostState: SnackbarHostState,
+    onAddEntry: () -> Unit,
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
     val authState by authViewModel.authState.collectAsState()
 
@@ -43,12 +50,28 @@ fun NavigationGraph(
                 }
             )
         }
-        composable(NavRoutes.HOME) { HomeScreen() }
-        composable(NavRoutes.STATS) { StatsScreen() }
+        composable(NavRoutes.HOME) {
+            DashboardScreen(
+                financeViewModel = financeViewModel,
+                smsViewModel = smsViewModel,
+                onSeeAllTransactions = {
+                    navController.navigate(NavRoutes.HISTORY) { launchSingleTop = true }
+                },
+                onOpenReview = {
+                    navController.navigate(NavRoutes.REVIEW) { launchSingleTop = true }
+                },
+                onAddEntry = onAddEntry
+            )
+        }
+        composable(NavRoutes.HISTORY) {
+            HistoryScreen(financeViewModel, snackbarHostState)
+        }
+        composable(NavRoutes.STATS) { StatsScreen(financeViewModel) }
         composable(NavRoutes.REVIEW) { ReviewScreen(smsViewModel) }
-        composable(NavRoutes.HISTORY) { HistoryScreen() }
         composable(NavRoutes.ABOUT) {
             AboutScreen(
+                authViewModel = authViewModel,
+                financeViewModel = financeViewModel,
                 onSignOut = {
                     authViewModel.signOut()
                     navController.navigate(NavRoutes.SIGN_IN) {

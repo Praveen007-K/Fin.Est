@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">Fin.Est</string>
     <string name="web_client_id">630008815266-g05gdqaj256ugm8osos6om0mg2e23k5d.apps.googleusercontent.com</string>
+
+    <!-- Captured-payment notifications -->
+    <string name="notification_channel_payments_name">Captured payments</string>
+    <string name="notification_channel_payments_description">Alerts you when a bank SMS becomes a transaction waiting for review</string>
+    <string name="notification_payment_debit_title">%1$s spent · %2$s</string>
+    <string name="notification_payment_credit_title">%1$s received · %2$s</string>
+    <string name="notification_payment_body">Tap to set the category and approve</string>
+    <string name="notification_action_approve">Approve</string>
+    <string name="notification_action_reject">Reject</string>
 </resources>

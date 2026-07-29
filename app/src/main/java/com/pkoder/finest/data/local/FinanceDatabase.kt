@@ -11,8 +11,8 @@ import com.pkoder.finest.data.local.entities.PendingTransactionEntity
 
 @Database(
     entities = [DebitEntryEntity::class, CreditEntryEntity::class, PendingTransactionEntity::class],
-    version = 3,
-    exportSchema = false
+    version = 4,
+    exportSchema = true
 )
 abstract class FinanceDatabase : RoomDatabase() {
     abstract fun debitEntryDao(): DebitEntryDao

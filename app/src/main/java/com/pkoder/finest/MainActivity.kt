@@ -1,21 +1,21 @@
 package com.pkoder.finest
 
 import android.Manifest
-import android.content.IntentFilter
+import android.content.Intent
 import android.content.pm.PackageManager
-import android.provider.Telephony
-import android.util.Log
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
+import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.core.content.ContextCompat
+import com.pkoder.finest.notification.TransactionNotifier
 import com.pkoder.finest.presentation.screens.MainScreen
 import com.pkoder.finest.presentation.ui.theme.FinEstTheme
 import com.pkoder.finest.presentation.viewmodel.FinanceViewModel
 import com.pkoder.finest.presentation.viewmodel.SmsViewModel
-import com.pkoder.finest.sms.SmsBroadcastReceiver
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -23,18 +23,12 @@ class MainActivity : ComponentActivity() {
 
     private val financeViewModel: FinanceViewModel by viewModels()
     private val smsViewModel: SmsViewModel by viewModels()
-    private val smsReceiver = SmsBroadcastReceiver()
-    private var smsReceiverRegistered = false
 
-    private val smsPermissionLauncher = registerForActivityResult(
+    private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val granted = permissions[Manifest.permission.RECEIVE_SMS] == true &&
-                permissions[Manifest.permission.READ_SMS] == true
-        if (granted) {
-            registerSmsReceiver()
-        } else {
-            Log.w("MainActivity", "SMS permissions denied — transaction SMS will not be tracked")
+        permissions.filterValues { !it }.keys.forEach { denied ->
+            Log.w(TAG, "Permission denied: $denied")
         }
     }
 
@@ -47,44 +41,40 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Wire parsed SMS into SmsViewModel
-        SmsBroadcastReceiver.onTransactionParsed = { transaction ->
-            smsViewModel.addPending(transaction)
-        }
+        handleNotificationTap(intent)
 
-        // Request SMS permissions at runtime (required on Android 6+)
-        val alreadyGranted = ContextCompat.checkSelfPermission(
-            this, Manifest.permission.RECEIVE_SMS
-        ) == PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(
-                    this, Manifest.permission.READ_SMS
-                ) == PackageManager.PERMISSION_GRANTED
-
-        if (alreadyGranted) {
-            registerSmsReceiver()
-        } else {
-            smsPermissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.RECEIVE_SMS,
-                    Manifest.permission.READ_SMS
-                )
-            )
-        }
+        // SMS capture happens in the manifest-declared receiver; it just needs the runtime grant.
+        // Notifications are optional — capture still works if the user says no.
+        requestMissingPermissions()
     }
 
-    private fun registerSmsReceiver() {
-        if (!smsReceiverRegistered) {
-            val filter = IntentFilter(Telephony.Sms.Intents.SMS_RECEIVED_ACTION)
-            registerReceiver(smsReceiver, filter)
-            smsReceiverRegistered = true
-        }
+    // launchMode is singleTop, so a notification tap while the app is already open arrives here.
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleNotificationTap(intent)
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        if (smsReceiverRegistered) {
-            unregisterReceiver(smsReceiver)
+    private fun handleNotificationTap(intent: Intent?) {
+        intent?.getStringExtra(TransactionNotifier.EXTRA_PENDING_ID)
+            ?.let { smsViewModel.requestReview(it) }
+    }
+
+    private fun requestMissingPermissions() {
+        val wanted = buildList {
+            add(Manifest.permission.RECEIVE_SMS)
+            add(Manifest.permission.READ_SMS)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                add(Manifest.permission.POST_NOTIFICATIONS)
+            }
         }
-        SmsBroadcastReceiver.onTransactionParsed = null // prevent leaks
+        val missing = wanted.filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+        if (missing.isNotEmpty()) permissionLauncher.launch(missing.toTypedArray())
+    }
+
+    private companion object {
+        const val TAG = "MainActivity"
     }
 }

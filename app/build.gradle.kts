@@ -110,11 +110,18 @@ dependencies {
     implementation("androidx.credentials:credentials-play-services-auth:1.2.2")
     implementation("com.google.android.gms:play-services-auth:21.0.0")
 
-    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    // Charts are Compose Canvas/layout composables now (presentation/components/charts),
+    // so MPAndroidChart and its AndroidView interop are gone.
 
     implementation("androidx.compose.material:material-icons-extended:1.7.8")
 }
 
 kapt {
     correctErrorTypes = true
+}
+
+// Room exports each schema version to app/schemas — the reference point for writing the next
+// migration, and what a migration test validates against.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }

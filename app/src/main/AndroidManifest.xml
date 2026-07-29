@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.READ_SMS"/>
     <uses-permission android:name="android.permission.RECEIVE_SMS"/>
+    <!-- Android 13+: required to alert the user that a payment SMS was captured. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:name=".App"
@@ -26,8 +28,10 @@
         <activity
             android:name="com.pkoder.finest.MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.FinEst">
+            <!-- singleTop + EXTRA_PENDING_ID: tapping a captured-payment notification reuses this
+                 activity and lands on that transaction in Review. -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -43,6 +47,12 @@
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
+
+        <!-- Approve / Reject straight from the notification shade. Not exported: only our own
+             PendingIntents trigger it. -->
+        <receiver
+            android:name=".notification.NotificationActionReceiver"
+            android:exported="false" />
     </application>
 
 </manifest>

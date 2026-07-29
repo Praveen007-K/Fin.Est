@@ -2,6 +2,7 @@ package com.pkoder.finest.sms
 
 import com.pkoder.finest.domain.model.PendingTransaction
 import com.pkoder.finest.domain.model.TransactionType
+import java.security.MessageDigest
 
 object SmsParser {
 
@@ -23,7 +24,7 @@ object SmsParser {
     private val debitKeywords = listOf(
         "debited", "debit", "withdrawn", "spent", "paid", "payment of",
         "transferred", "charged", "purchase", "sent",
-        "dr.", " dr ", "dr from", "dr from"  // BOB uses "Dr. from A/C"
+        "dr.", " dr ", "dr from"  // BOB uses "Dr. from A/C"
     )
 
     private val creditKeywords = listOf(
@@ -46,7 +47,11 @@ object SmsParser {
     // UPI ID pattern: word chars before @ and after (e.g. name@okaxis, q12345@ybl)
     private val upiIdRegex = Regex("""[\w.]{3,}@[a-zA-Z]{2,}""")
 
-    fun parse(sender: String, body: String): PendingTransaction? {
+    /**
+     * @param timestampMillis when the *SMS* was sent (`SmsMessage.timestampMillis`), not when it
+     *   was parsed — a message can be delivered long after the transaction happened.
+     */
+    fun parse(sender: String, body: String, timestampMillis: Long): PendingTransaction? {
         val bank = resolveBank(sender, body) ?: return null
         val lowerBody = body.lowercase()
 
@@ -67,6 +72,7 @@ object SmsParser {
         val description = extractDescription(body)
 
         return PendingTransaction(
+            id = dedupeId(sender, body, timestampMillis),
             type = type,
             amount = amount,
             bank = bank,
@@ -74,9 +80,20 @@ object SmsParser {
             category = if (type == TransactionType.DEBIT) "Uncategorized" else "",
             source = if (type == TransactionType.CREDIT) bank else "",
             description = description,
+            timestamp = timestampMillis,
             rawSms = body
         )
     }
+
+    /**
+     * Stable id for one physical message, so a duplicated broadcast — or a re-parse after a
+     * restart — collides with the existing row instead of adding a second pending entry.
+     */
+    fun dedupeId(sender: String, body: String, timestampMillis: Long): String =
+        MessageDigest.getInstance("SHA-256")
+            .digest("$sender|$body|$timestampMillis".toByteArray())
+            .take(16)
+            .joinToString("") { "%02x".format(it) }
 
     private fun resolveBank(sender: String, body: String): String? {
         val upperSender = sender.uppercase()

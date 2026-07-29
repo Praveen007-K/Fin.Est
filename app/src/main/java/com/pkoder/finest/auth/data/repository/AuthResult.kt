@@ -4,12 +4,12 @@ import com.pkoder.finest.auth.domain.model.UserData
 
 sealed class AuthResult {
     data class Success(val userData: UserData) : AuthResult()
-    data class Error(val message: String) : AuthResult()
-    object Loading : AuthResult()
-}
 
-interface AuthRepository {
-    fun getCurrentUser(): UserData?
-    suspend fun signInWithGoogleToken(idToken: String): AuthResult
-    suspend fun signOut()
+    /** A real failure worth telling the user about. */
+    data class Error(val message: String) : AuthResult()
+
+    data object Loading : AuthResult()
+
+    /** Nobody is signed in — the normal starting state, not an error. */
+    data object SignedOut : AuthResult()
 }
