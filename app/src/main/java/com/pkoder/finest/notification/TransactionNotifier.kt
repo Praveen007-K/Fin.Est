@@ -6,6 +6,7 @@ import android.content.Intent
 import androidx.core.app.NotificationChannelCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.pkoder.finest.MainActivity
 import com.pkoder.finest.R
 import com.pkoder.finest.domain.model.PendingTransaction
@@ -56,6 +57,8 @@ class TransactionNotifier @Inject constructor(
             .setStyle(NotificationCompat.BigTextStyle().bigText(pending.rawSms))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            // Mint tint on the small icon, so the shade card reads as this app.
+            .setColor(ContextCompat.getColor(context, R.color.charcoal_primary))
             .setAutoCancel(true)
             .setContentIntent(reviewIntent(pending.id))
             .addAction(

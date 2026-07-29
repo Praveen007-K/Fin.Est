@@ -7,6 +7,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.roundToLong
 
 /**
  * Money and date formatting used across every screen and the notifications.
@@ -58,6 +59,15 @@ internal fun groupIndianDigits(fixed: String): String {
         "$head,${whole.takeLast(3)}"
     }
     return if (fraction.isEmpty()) grouped else "$grouped.$fraction"
+}
+
+/**
+ * Whole rupees, e.g. `₹46,559` — for summary tiles, chart tooltips and the donut centre, where the
+ * paise cost more width than they carry meaning and would push a lakh figure into an ellipsis.
+ */
+fun Double.asMoneyWhole(): String {
+    val formatted = RUPEE + groupIndianDigits(abs(this).roundToLong().toString())
+    return if (this < 0) "-$formatted" else formatted
 }
 
 /** Money with an explicit direction, e.g. `-₹250.00` for an expense. */

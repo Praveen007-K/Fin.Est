@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Compose owns the app's colours (presentation/ui/theme). Only colours referenced from XML belong
-  here; the unused project-template purple/teal palette has been removed.
+  here — currently just the launch-window background, which has to match `Charcoal.surface` exactly
+  or the app flashes a light panel before Compose draws its first frame.
 -->
-<resources />
+<resources>
+    <color name="charcoal_surface">#FF131313</color>
+    <!-- Mint accent, for the notification tint (built outside Compose). -->
+    <color name="charcoal_primary">#FFC4F7F9</color>
+</resources>

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -16,7 +15,6 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,6 +27,10 @@ import com.pkoder.finest.data.local.entities.DebitEntryEntity
 import com.pkoder.finest.domain.model.TransactionOptions
 import com.pkoder.finest.presentation.components.AmountTextField
 import com.pkoder.finest.presentation.components.DropdownField
+import com.pkoder.finest.presentation.components.GhostPillButton
+import com.pkoder.finest.presentation.components.MintPillButton
+import com.pkoder.finest.presentation.components.finEstFieldColors
+import com.pkoder.finest.presentation.ui.theme.Mono
 import com.pkoder.finest.presentation.ui.theme.Spacing
 
 /**
@@ -45,19 +47,28 @@ fun AddEntrySheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var isExpense by remember { mutableStateOf(true) }
 
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        shape = MaterialTheme.shapes.extraLarge
+    ) {
         SheetBody(title = "New transaction") {
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 SegmentedButton(
                     selected = isExpense,
                     onClick = { isExpense = true },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2)
-                ) { Text("Expense") }
+                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
+                    colors = sheetSegmentColors(),
+                    icon = {}
+                ) { Text(text = "Expense", style = Mono.label) }
                 SegmentedButton(
                     selected = !isExpense,
                     onClick = { isExpense = false },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2)
-                ) { Text("Income") }
+                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
+                    colors = sheetSegmentColors(),
+                    icon = {}
+                ) { Text(text = "Income", style = Mono.label) }
             }
 
             if (isExpense) {
@@ -76,7 +87,11 @@ fun EditDebitSheet(
     onDismiss: () -> Unit,
     onSave: (DebitEntryEntity) -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        shape = MaterialTheme.shapes.extraLarge
+    ) {
         SheetBody(title = "Edit expense") {
             DebitFields(entry = entry, onSave = onSave, onCancel = onDismiss)
         }
@@ -90,7 +105,11 @@ fun EditCreditSheet(
     onDismiss: () -> Unit,
     onSave: (CreditEntryEntity) -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        shape = MaterialTheme.shapes.extraLarge
+    ) {
         SheetBody(title = "Edit income") {
             CreditFields(entry = entry, onSave = onSave, onCancel = onDismiss)
         }
@@ -103,11 +122,11 @@ private fun SheetBody(title: String, content: @Composable () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = Spacing.lg)
+            .padding(horizontal = Spacing.card)
             .padding(bottom = Spacing.xxl),
         verticalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
-        Text(text = title, style = MaterialTheme.typography.titleLarge)
+        Text(text = title, style = MaterialTheme.typography.headlineMedium)
         content()
     }
 }
@@ -161,6 +180,8 @@ private fun DebitFields(
         onValueChange = { description = it },
         label = { Text("Note (optional)") },
         singleLine = true,
+        shape = MaterialTheme.shapes.medium,
+        colors = finEstFieldColors(),
         modifier = Modifier.fillMaxWidth()
     )
 
@@ -235,15 +256,31 @@ private fun SheetActions(onCancel: () -> Unit, onSave: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = Spacing.sm),
-        horizontalArrangement = Arrangement.End
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
     ) {
-        TextButton(onClick = onCancel) { Text("Cancel") }
-        Button(
+        GhostPillButton(
+            text = "CANCEL",
+            onClick = onCancel,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f)
+        )
+        MintPillButton(
+            text = "SAVE",
             onClick = onSave,
-            modifier = Modifier.padding(start = Spacing.sm)
-        ) { Text("Save") }
+            modifier = Modifier.weight(1f)
+        )
     }
 }
+
+@Composable
+private fun sheetSegmentColors() = SegmentedButtonDefaults.colors(
+    activeContainerColor = MaterialTheme.colorScheme.primaryContainer,
+    activeContentColor = MaterialTheme.colorScheme.onPrimary,
+    activeBorderColor = MaterialTheme.colorScheme.primaryContainer,
+    inactiveContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+    inactiveContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    inactiveBorderColor = MaterialTheme.colorScheme.outlineVariant
+)
 
 /** `250.0` → `"250"`, `250.5` → `"250.5"` — avoids seeding the field with "250.0". */
 private fun Double.toPlainInput(): String =

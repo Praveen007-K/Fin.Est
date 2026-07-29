@@ -5,6 +5,7 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -41,6 +42,8 @@ fun DropdownField(
             readOnly = true,
             singleLine = true,
             isError = isError,
+            shape = MaterialTheme.shapes.medium,
+            colors = finEstFieldColors(),
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -51,7 +54,9 @@ fun DropdownField(
 
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            shape = MaterialTheme.shapes.medium
         ) {
             options.forEach { selection ->
                 DropdownMenuItem(

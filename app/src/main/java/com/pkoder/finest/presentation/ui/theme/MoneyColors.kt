@@ -7,11 +7,11 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 /**
- * Money semantics live outside the Material scheme.
+ * Money semantics, kept outside the Material scheme.
  *
- * The app uses dynamic colour, so `primary`/`error` change from device to device — income and
- * expense must not. These are fixed, contrast-checked pairs for light and dark, plus a categorical
- * palette for charts that stays readable in both.
+ * The design system assigns them explicitly: "Mint Green for positive trends and Soft Pink for
+ * negative trends". Containers are those two accents at 12% over the charcoal canvas — the design's
+ * "secondary colours at 10% opacity" rule — so a tinted avatar never reads as a solid button.
  */
 @Immutable
 data class MoneyColors(
@@ -24,37 +24,32 @@ data class MoneyColors(
     val chartPalette: List<Color>
 )
 
-private val LightChartPalette = listOf(
-    Color(0xFF3D5AFE), Color(0xFF00897B), Color(0xFFEF6C00), Color(0xFF8E24AA),
-    Color(0xFF0288D1), Color(0xFFC2185B), Color(0xFF558B2F), Color(0xFF5D4037)
+/**
+ * Categorical chart tones: the three brand accents first, then muted extensions that still read on
+ * `#131313` without competing with mint.
+ */
+private val CharcoalChartPalette = listOf(
+    Charcoal.primary,
+    Charcoal.secondary,
+    Charcoal.tertiaryFixed,
+    Charcoal.primaryFixedDim,
+    Color(0xFFB9A5D6),
+    Color(0xFF8FC5A9),
+    Color(0xFFE0A98A),
+    Color(0xFF9BB8CE)
 )
 
-private val DarkChartPalette = listOf(
-    Color(0xFF9FA8FF), Color(0xFF56C9BC), Color(0xFFFFB264), Color(0xFFD69AE8),
-    Color(0xFF76C7F2), Color(0xFFF48FB1), Color(0xFFA5D267), Color(0xFFBCAAA4)
+val CharcoalMoneyColors = MoneyColors(
+    income = Charcoal.primary,
+    incomeContainer = Charcoal.primary.copy(alpha = 0.12f),
+    onIncomeContainer = Charcoal.primary,
+    expense = Charcoal.secondary,
+    expenseContainer = Charcoal.secondary.copy(alpha = 0.12f),
+    onExpenseContainer = Charcoal.secondary,
+    chartPalette = CharcoalChartPalette
 )
 
-val LightMoneyColors = MoneyColors(
-    income = Color(0xFF14663A),
-    incomeContainer = Color(0xFFCFF0DC),
-    onIncomeContainer = Color(0xFF03301A),
-    expense = Color(0xFFA8342A),
-    expenseContainer = Color(0xFFFBDDD9),
-    onExpenseContainer = Color(0xFF41100B),
-    chartPalette = LightChartPalette
-)
-
-val DarkMoneyColors = MoneyColors(
-    income = Color(0xFF7BDBA4),
-    incomeContainer = Color(0xFF11341F),
-    onIncomeContainer = Color(0xFFB6F0CC),
-    expense = Color(0xFFFFB4AB),
-    expenseContainer = Color(0xFF3D1512),
-    onExpenseContainer = Color(0xFFFFDAD5),
-    chartPalette = DarkChartPalette
-)
-
-val LocalMoneyColors = staticCompositionLocalOf { LightMoneyColors }
+val LocalMoneyColors = staticCompositionLocalOf { CharcoalMoneyColors }
 
 /** Shorthand: `moneyColors.expense` inside any composable under [FinEstTheme]. */
 val moneyColors: MoneyColors

@@ -1,5 +1,7 @@
 package com.pkoder.finest.presentation.components
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,30 +9,31 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.pkoder.finest.presentation.ui.theme.Mono
 import com.pkoder.finest.presentation.ui.theme.Spacing
 
 /**
- * Empty state with an optional call to action — replaces the bare centred sentence the screens
- * used to show.
+ * Empty state with an optional call to action.
+ *
+ * The icon sits on a mint disc so an empty screen still looks like part of the same system rather
+ * than a grey placeholder.
  */
 @Composable
 fun EmptyState(
@@ -49,25 +52,16 @@ fun EmptyState(
         verticalArrangement = Arrangement.Center
     ) {
         if (icon != null) {
-            Box(
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-            Box(modifier = Modifier.size(Spacing.lg))
+            TonalIcon(
+                icon = icon,
+                tint = MaterialTheme.colorScheme.primary,
+                size = 72.dp
+            )
+            Box(modifier = Modifier.size(Spacing.xl))
         }
         Text(
             text = message,
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center
         )
         if (hint != null) {
@@ -80,10 +74,11 @@ fun EmptyState(
             )
         }
         if (actionLabel != null && onAction != null) {
-            Button(
+            MintPillButton(
+                text = actionLabel.uppercase(),
                 onClick = onAction,
-                modifier = Modifier.padding(top = Spacing.lg)
-            ) { Text(actionLabel) }
+                modifier = Modifier.padding(top = Spacing.xl)
+            )
         }
     }
 }
@@ -99,43 +94,44 @@ fun ConfirmDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = { Text(message) },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+        shape = MaterialTheme.shapes.large,
+        title = { Text(text = title, style = MaterialTheme.typography.headlineSmall) },
+        text = {
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(
-                    text = confirmLabel,
+                    text = confirmLabel.uppercase(),
+                    style = Mono.label,
                     color = if (destructive) MaterialTheme.colorScheme.error
                     else MaterialTheme.colorScheme.primary
                 )
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Cancel") }
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = "CANCEL",
+                    style = Mono.label,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     )
 }
 
-@Composable
-fun SectionHeader(
-    title: String,
-    modifier: Modifier = Modifier,
-    actionLabel: String? = null,
-    onAction: (() -> Unit)? = null
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text = title, style = MaterialTheme.typography.titleMedium)
-        if (actionLabel != null && onAction != null) {
-            TextButton(onClick = onAction) { Text(actionLabel) }
-        }
-    }
-}
-
-/** Category/source row with a share bar — the stats list item. */
+/**
+ * Category/source row with a share bar — the insights list item.
+ *
+ * The bar is a plain rounded track rather than a `LinearProgressIndicator`: the design wants a 6dp
+ * pill with no indeterminate behaviour, and the progress semantics were misleading here anyway.
+ */
 @Composable
 fun BreakdownRow(
     label: String,
@@ -144,29 +140,50 @@ fun BreakdownRow(
     color: Color,
     modifier: Modifier = Modifier
 ) {
-    Column(modifier = modifier.fillMaxWidth().padding(vertical = Spacing.sm)) {
+    val animated by animateFloatAsState(
+        targetValue = fraction.coerceIn(0f, 1f),
+        animationSpec = tween(durationMillis = 600),
+        label = "share"
+    )
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = Spacing.sm)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 modifier = Modifier.weight(1f, fill = false)
-            )
-            Text(text = value, style = MaterialTheme.typography.bodyMedium)
+            ) {
+                Box(modifier = Modifier.size(8.dp).background(color, CircleShape))
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Text(text = value, style = Mono.amountSmall)
         }
-        LinearProgressIndicator(
-            progress = { fraction.coerceIn(0f, 1f) },
-            color = color,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = Spacing.xs)
-                .clip(MaterialTheme.shapes.extraSmall)
-        )
+                .padding(top = Spacing.sm)
+                .height(6.dp)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh, CircleShape)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(animated)
+                    .height(6.dp)
+                    .background(color, CircleShape)
+            )
+        }
     }
 }

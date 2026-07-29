@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import com.pkoder.finest.presentation.ui.theme.Mono
 
 /**
  * Amount input.
@@ -30,13 +31,18 @@ fun AmountTextField(
         value = value,
         onValueChange = { raw -> onValueChange(sanitizeAmountInput(raw)) },
         label = { Text(label) },
-        prefix = { Text("₹") },
+        prefix = { Text(text = "₹", style = Mono.amount) },
+        // Tabular figures while typing too, so the field matches how the amount will be displayed.
+        textStyle = Mono.amount.copy(color = MaterialTheme.colorScheme.onSurface),
         singleLine = true,
         isError = isError,
+        shape = MaterialTheme.shapes.medium,
+        colors = finEstFieldColors(),
         supportingText = supportingText?.let {
             {
                 Text(
                     text = it,
+                    style = MaterialTheme.typography.bodySmall,
                     color = if (isError) MaterialTheme.colorScheme.error
                     else MaterialTheme.colorScheme.onSurfaceVariant
                 )

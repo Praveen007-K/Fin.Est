@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  The app is dark-only (the design system ships a single dark token set), so the platform theme is
+  the dark one and the window background is the charcoal canvas. Anything lighter here shows as a
+  white flash between the launcher and Compose's first frame.
+-->
 <resources>
 
-    <style name="Theme.FinEst" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.FinEst" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/charcoal_surface</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
 </resources>

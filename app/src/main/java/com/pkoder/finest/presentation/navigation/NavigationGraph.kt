@@ -60,6 +60,9 @@ fun NavigationGraph(
                 onOpenReview = {
                     navController.navigate(NavRoutes.REVIEW) { launchSingleTop = true }
                 },
+                onOpenInsights = {
+                    navController.navigate(NavRoutes.STATS) { launchSingleTop = true }
+                },
                 onAddEntry = onAddEntry
             )
         }

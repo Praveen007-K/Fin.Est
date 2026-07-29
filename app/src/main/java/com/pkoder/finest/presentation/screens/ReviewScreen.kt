@@ -2,9 +2,7 @@ package com.pkoder.finest.presentation.screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,27 +11,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
+import androidx.compose.material.icons.filled.RateReview
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -47,7 +37,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.pkoder.finest.domain.model.PendingTransaction
@@ -57,10 +46,17 @@ import com.pkoder.finest.presentation.components.AmountTextField
 import com.pkoder.finest.presentation.components.ConfirmDialog
 import com.pkoder.finest.presentation.components.DropdownField
 import com.pkoder.finest.presentation.components.EmptyState
+import com.pkoder.finest.presentation.components.GhostPillButton
+import com.pkoder.finest.presentation.components.GlassCard
+import com.pkoder.finest.presentation.components.MintPillButton
+import com.pkoder.finest.presentation.components.ScreenHeader
+import com.pkoder.finest.presentation.components.TonalIcon
+import com.pkoder.finest.presentation.components.categoryVisual
+import com.pkoder.finest.presentation.ui.theme.Mono
 import com.pkoder.finest.presentation.ui.theme.Spacing
-import com.pkoder.finest.presentation.ui.theme.moneyColors
-import com.pkoder.finest.presentation.util.asDateTime
+import com.pkoder.finest.presentation.util.asDate
 import com.pkoder.finest.presentation.util.asSignedMoney
+import com.pkoder.finest.presentation.util.asTime
 import com.pkoder.finest.presentation.viewmodel.SmsViewModel
 
 /**
@@ -120,55 +116,71 @@ fun ReviewScreen(viewModel: SmsViewModel) {
     }
 
     if (pending.isEmpty()) {
-        EmptyState(
-            message = "Nothing to review",
-            icon = Icons.Default.Notifications,
-            hint = "Payment SMS from SBI, HDFC and BOB show up here automatically."
-        )
+        Column(modifier = Modifier.fillMaxSize()) {
+            Column(modifier = Modifier.padding(horizontal = Spacing.screen, vertical = Spacing.sm)) {
+                ScreenHeader(
+                    title = "Pending Review",
+                    subtitle = "Nothing needs your attention"
+                )
+            }
+            EmptyState(
+                message = "Nothing to review",
+                icon = Icons.Default.RateReview,
+                hint = "Payment SMS from SBI, HDFC and BOB show up here automatically."
+            )
+        }
         return
     }
 
     val listState = rememberLazyListState()
     LaunchedEffect(highlightId, pending) {
         val index = pending.indexOfFirst { it.id == highlightId }
-        if (index >= 0) listState.animateScrollToItem(index)
+        // +1 for the header item that precedes the cards.
+        if (index >= 0) listState.animateScrollToItem(index + 1)
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Spacing.screen, vertical = Spacing.sm),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = if (pending.size == 1) "1 transaction" else "${pending.size} transactions",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            TextButton(onClick = { confirmRejectAll = true }) { Text("Reject all") }
+    LazyColumn(
+        state = listState,
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = Spacing.screen,
+            end = Spacing.screen,
+            top = Spacing.sm,
+            bottom = Spacing.xxl
+        ),
+        verticalArrangement = Arrangement.spacedBy(Spacing.lg)
+    ) {
+        item {
+            // "Reject all" gets its own line: beside the subtitle it forced the sentence to wrap.
+            Column(modifier = Modifier.fillMaxWidth()) {
+                ScreenHeader(
+                    title = "Pending Review",
+                    subtitle = if (pending.size == 1) "1 transaction requires your attention"
+                    else "${pending.size} transactions require your attention"
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = { confirmRejectAll = true }) {
+                        Text(
+                            text = "REJECT ALL",
+                            style = Mono.label,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
         }
 
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                start = Spacing.screen,
-                end = Spacing.screen,
-                bottom = Spacing.xxl
-            ),
-            verticalArrangement = Arrangement.spacedBy(Spacing.md)
-        ) {
-            items(pending, key = { it.id }) { transaction ->
-                PendingTransactionCard(
-                    transaction = transaction,
-                    highlighted = transaction.id == highlightId,
-                    onOpen = { editing = transaction },
-                    onApprove = { viewModel.approve(transaction) },
-                    onReject = { viewModel.dismiss(transaction.id) }
-                )
-            }
+        items(pending, key = { it.id }) { transaction ->
+            PendingTransactionCard(
+                transaction = transaction,
+                highlighted = transaction.id == highlightId,
+                onOpen = { editing = transaction },
+                onApprove = { viewModel.approve(transaction) },
+                onReject = { viewModel.dismiss(transaction.id) }
+            )
         }
     }
 }
@@ -182,82 +194,77 @@ private fun PendingTransactionCard(
     onReject: () -> Unit
 ) {
     val isDebit = transaction.type == TransactionType.DEBIT
-    val colors = moneyColors
-    val accent = if (isDebit) colors.expense else colors.income
+    val title = if (isDebit) transaction.category.ifBlank { "Uncategorized" }
+    else transaction.source.ifBlank { transaction.bank }
+    val visual = categoryVisual(title, isDebit)
     var showRawSms by remember { mutableStateOf(false) }
 
     val borderColor by animateColorAsState(
-        targetValue = if (highlighted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+        targetValue = if (highlighted) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
         label = "highlight"
     )
 
-    Card(
-        onClick = onOpen,
+    GlassCard(
         modifier = Modifier.fillMaxWidth(),
-        border = BorderStroke(if (highlighted) 2.dp else 1.dp, borderColor)
+        borderColor = borderColor,
+        borderWidth = if (highlighted) 2.dp else 1.dp,
+        onClick = onOpen
     ) {
-        Column(modifier = Modifier.padding(Spacing.lg)) {
+        Column(modifier = Modifier.padding(Spacing.card)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
+                TonalIcon(icon = visual.icon, tint = visual.tint, size = 44.dp)
+                Column(
                     modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape),
-                    contentAlignment = Alignment.Center
+                        .weight(1f)
+                        .padding(horizontal = Spacing.lg)
                 ) {
-                    Icon(
-                        imageVector = if (isDebit) Icons.Default.ArrowUpward else Icons.Default.ArrowDownward,
-                        contentDescription = if (isDebit) "Expense" else "Income",
-                        tint = accent,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (isDebit) transaction.category.ifBlank { "Uncategorized" }
-                        else transaction.source.ifBlank { transaction.bank },
-                        style = MaterialTheme.typography.titleSmall
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "${transaction.bank} · ${transaction.paymentMethod}",
-                        style = MaterialTheme.typography.bodySmall,
+                        text = (if (isDebit) "EXPENSE" else "INCOME") + " · CAPTURED",
+                        style = Mono.label,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Text(
                     text = transaction.amount.asSignedMoney(isDebit),
-                    style = MaterialTheme.typography.titleMedium,
-                    color = accent
+                    style = Mono.amount,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
 
-            if (transaction.description.isNotBlank()) {
-                Text(
-                    text = transaction.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = Spacing.sm)
-                )
-            }
-
-            Text(
-                text = transaction.timestamp.asDateTime(),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = Spacing.xs)
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f),
+                modifier = Modifier.padding(vertical = Spacing.lg)
             )
+
+            DetailRow(label = "Date", value = transaction.timestamp.asDate())
+            DetailRow(label = "Time", value = transaction.timestamp.asTime())
+            DetailRow(label = "Bank", value = transaction.bank)
+            if (isDebit) DetailRow(label = "Method", value = transaction.paymentMethod)
+            if (transaction.description.isNotBlank()) {
+                DetailRow(label = "Details", value = transaction.description)
+            }
 
             TextButton(
                 onClick = { showRawSms = !showRawSms },
                 contentPadding = PaddingValues(vertical = Spacing.xs, horizontal = 0.dp)
             ) {
-                Text(if (showRawSms) "Hide message" else "Show message")
+                Text(
+                    text = if (showRawSms) "HIDE MESSAGE" else "SHOW MESSAGE",
+                    style = Mono.label,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
             AnimatedVisibility(visible = showRawSms) {
                 Text(
                     text = transaction.rawSms,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = Mono.body,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
@@ -265,31 +272,49 @@ private fun PendingTransactionCard(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = Spacing.md),
-                horizontalArrangement = Arrangement.End,
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(top = Spacing.lg),
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
-                OutlinedButton(onClick = onReject) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(Spacing.xs))
-                    Text("Reject")
-                }
-                Spacer(modifier = Modifier.width(Spacing.sm))
-                Button(onClick = onApprove) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(Spacing.xs))
-                    Text("Approve")
-                }
+                GhostPillButton(
+                    text = "REJECT",
+                    onClick = onReject,
+                    icon = Icons.Default.Close,
+                    contentColor = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.weight(1f)
+                )
+                MintPillButton(
+                    text = "APPROVE",
+                    onClick = onApprove,
+                    icon = Icons.Default.Check,
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
+    }
+}
+
+/** Label on the left, value right-aligned in tabular figures — the design's detail table. */
+@Composable
+private fun DetailRow(label: String, value: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = Spacing.xs),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = value,
+            style = Mono.label,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(start = Spacing.lg)
+        )
     }
 }
 
@@ -329,22 +354,26 @@ private fun PendingDetailSheet(
         description = description
     )
 
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        shape = MaterialTheme.shapes.extraLarge
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = Spacing.lg)
+                .padding(horizontal = Spacing.card)
                 .padding(bottom = Spacing.xxl),
             verticalArrangement = Arrangement.spacedBy(Spacing.md)
         ) {
             Text(
                 text = if (isDebit) "Review expense" else "Review income",
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.headlineMedium
             )
             Text(
                 text = transaction.rawSms,
-                style = MaterialTheme.typography.bodySmall,
+                style = Mono.body,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
@@ -380,6 +409,7 @@ private fun PendingDetailSheet(
                     onValueChange = { description = it },
                     label = { Text("Note") },
                     singleLine = true,
+                    shape = MaterialTheme.shapes.medium,
                     modifier = Modifier.fillMaxWidth()
                 )
             } else {
@@ -393,25 +423,29 @@ private fun PendingDetailSheet(
 
             Spacer(modifier = Modifier.height(Spacing.xs))
 
-            Button(
+            MintPillButton(
+                text = "APPROVE",
                 onClick = { if (amountValid) onApprove(edited()) },
                 enabled = amountValid,
                 modifier = Modifier.fillMaxWidth()
-            ) { Text("Approve") }
+            )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+                horizontalArrangement = Arrangement.spacedBy(Spacing.md)
             ) {
-                OutlinedButton(
+                GhostPillButton(
+                    text = "SAVE FOR LATER",
                     onClick = { onSaveDraft(edited()) },
                     enabled = amountValid,
                     modifier = Modifier.weight(1f)
-                ) { Text("Save for later") }
-                OutlinedButton(
+                )
+                GhostPillButton(
+                    text = "REJECT",
                     onClick = { onReject(transaction) },
+                    contentColor = MaterialTheme.colorScheme.error,
                     modifier = Modifier.weight(1f)
-                ) { Text("Reject") }
+                )
             }
         }
     }

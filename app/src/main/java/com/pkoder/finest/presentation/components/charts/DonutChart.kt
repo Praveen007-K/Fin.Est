@@ -22,7 +22,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -30,6 +29,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.pkoder.finest.presentation.ui.theme.Mono
 import com.pkoder.finest.presentation.ui.theme.Spacing
 
 data class DonutSlice(
@@ -39,27 +39,31 @@ data class DonutSlice(
 )
 
 /**
- * Compose-native replacement for the MPAndroidChart pie: themes itself, animates in, and needs no
- * `AndroidView` interop.
+ * The wealth-distribution ring from the Insights design: a thick band of brand tones with the total
+ * in tabular figures at the centre.
+ *
+ * The reference mock hangs leader-line callouts off each slice; those need collision handling to stay
+ * legible on a narrow screen, so the amounts live in the legend under the chart instead — same
+ * information, no overlap.
  */
 @Composable
 fun DonutChart(
     slices: List<DonutSlice>,
     modifier: Modifier = Modifier,
-    strokeWidth: Dp = 26.dp,
+    strokeWidth: Dp = 34.dp,
     centerLabel: String? = null,
     centerCaption: String? = null
 ) {
     val total = slices.sumOf { it.value }
     if (total <= 0.0) return
 
-    // Re-animates whenever the data changes, so switching stats period feels responsive.
+    // Re-animates whenever the data changes, so switching the insights period feels responsive.
     val sweepProgress = remember(slices) { Animatable(0f) }
     LaunchedEffect(slices) {
         sweepProgress.animateTo(1f, tween(durationMillis = 650, easing = FastOutSlowInEasing))
     }
 
-    val trackColor = MaterialTheme.colorScheme.surfaceVariant
+    val trackColor = MaterialTheme.colorScheme.surfaceContainerHigh
 
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Canvas(
@@ -105,50 +109,92 @@ fun DonutChart(
         }
 
         if (centerLabel != null) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = centerLabel,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 1
-                )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(horizontal = strokeWidth + Spacing.lg)
+            ) {
                 if (centerCaption != null) {
                     Text(
-                        text = centerCaption,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = centerCaption.uppercase(),
+                        style = Mono.labelWide,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
                     )
                 }
+                Text(
+                    text = centerLabel,
+                    style = Mono.displayLarge,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = Spacing.xs)
+                )
             }
         }
     }
 }
 
-/** Colour swatch + label + value row, shared by both stats tabs. */
+/**
+ * Dot + label + share, laid out as the design's three-up legend under the ring.
+ *
+ * Anything past [maxItems] is folded into a single "Other" entry rather than dropped, so the shares
+ * on screen always add up to 100% — a top-3 legend that silently omits four more categories reads as
+ * if those were all there is.
+ */
 @Composable
-fun ChartLegendRow(
-    color: Color,
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
+fun DonutLegend(
+    slices: List<DonutSlice>,
+    modifier: Modifier = Modifier,
+    maxItems: Int = 3
 ) {
+    val total = slices.sumOf { it.value }
+    if (total <= 0.0) return
+
+    val shown = if (slices.size <= maxItems) {
+        slices
+    } else {
+        val head = slices.take(maxItems - 1)
+        val rest = slices.drop(maxItems - 1)
+        head + DonutSlice(
+            label = "Other (${rest.size})",
+            value = rest.sumOf { it.value },
+            color = MaterialTheme.colorScheme.outline
+        )
+    }
+
     Row(
         modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Spacing.md)
+        horizontalArrangement = Arrangement.spacedBy(Spacing.lg)
     ) {
-        Box(
-            modifier = Modifier
-                .size(10.dp)
-                .clip(CircleShape)
-                .background(color)
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f)
-        )
-        Text(text = value, style = MaterialTheme.typography.bodyMedium)
+        shown.forEach { slice ->
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.Top,
+                horizontalArrangement = Arrangement.spacedBy(Spacing.sm)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .padding(top = 6.dp)
+                        .size(8.dp)
+                        .background(slice.color, CircleShape)
+                )
+                Column {
+                    Text(
+                        text = slice.label,
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = "${Math.round(slice.value / total * 100)}%",
+                        style = Mono.label,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+        // Pads a one- or two-slice legend so the columns keep the same width as a full row.
+        repeat(maxItems - shown.size) {
+            Box(modifier = Modifier.weight(1f))
+        }
     }
 }

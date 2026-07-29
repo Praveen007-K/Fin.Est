@@ -187,18 +187,20 @@ Called from `FinanceViewModel.refresh()` (init + pull-to-refresh on the dashboar
 
 `MainActivity` → `FinEstTheme` → `MainScreen` → `NavigationGraph`.
 
-`MainScreen` is the shell: one `CenterAlignedTopAppBar` (title per route + profile avatar), one
-`NavigationBar`, one `SnackbarHost`, and the add-entry FAB (Home/History only). Screens are content
-only — they do not nest their own Scaffold.
+`MainScreen` is the shell: one `CenterAlignedTopAppBar` (profile avatar left, the `FIN.EST` wordmark
+centred, a review bell right that dots when the queue is non-empty), one hand-rolled
+`BottomNavigationBar`, one `SnackbarHost`, and the add-entry FAB (**History only** — Home offers the
+quick-action row instead, so the FAB would duplicate it). Screens are content only — they do not nest
+their own Scaffold, and each renders its own large in-page title under the constant brand bar.
 
 | Route | Screen | Content |
 |---|---|---|
-| `sign_in` | `SignInScreen` | Logo, tagline, Google button; no bars |
-| `home` | `DashboardScreen` | Balance hero (month income − expense), income/expense tiles, "N payments need review" prompt, recent activity, pull-to-refresh |
-| `history` | `HistoryScreen` | Search + type/period filter chips, day headers with daily net, tap to edit, delete with an **Undo** snackbar (the write is deferred until the snackbar closes) |
-| `stats` | `StatsScreen` | Expense/Income toggle, period chips, donut + breakdown bars, month-by-month bars |
+| `sign_in` | `SignInScreen` | Wordmark, tagline, glowing wallet mark, ornamental ledger motif, mint Google pill; no bars |
+| `home` | `DashboardScreen` | Balance hero (month net, trend chip vs last month, sparkline of running daily net), income/expense tiles, four-up quick actions, "N payments need review" prompt, recent activity, pull-to-refresh |
+| `history` | `HistoryScreen` | Screen header with a period dropdown pill, search, type chips, spend-per-bucket bar chart, day headers with daily net, tap to edit, delete with an **Undo** snackbar (the write is deferred until the snackbar closes) |
+| `stats` | `StatsScreen` | Centred title, Expense/Income toggle + period pill, totals tiles, donut + legend + breakdown bars, trend bars |
 | `review` | `ReviewScreen` | Pending SMS cards, expandable raw SMS, Approve/Reject, "Reject all", detail sheet for corrections |
-| `about` | `AboutScreen` | Avatar/email, sync state + unsynced count, totals, version, Sign out |
+| `about` | `AboutScreen` | Centred identity card with chips, cloud-sync card (share-synced bar + Force sync now), About list (notification settings link, recognised banks, totals, version), Sign out |
 
 Add and edit both use `screens/entry/EntrySheets.kt` (`AddEntrySheet` with an Expense/Income
 segmented toggle, `EditDebitSheet`, `EditCreditSheet`) so the field logic exists once.
@@ -207,6 +209,26 @@ Dropdown vocabulary lives in
 [TransactionOptions](app/src/main/java/com/pkoder/finest/domain/model/TransactionOptions.kt); the
 manual forms and the SMS review sheet share it, and `withCurrent()` keeps a parser-produced value
 (e.g. "IMPS") selectable even if it is not in the list.
+
+### Shared UI vocabulary
+
+Every screen is assembled from
+[components/Surfaces.kt](app/src/main/java/com/pkoder/finest/presentation/components/Surfaces.kt) —
+`GlassCard` (the single container: tonal charcoal + a hairline stroke, no elevation), `TonalIcon`,
+`MonoChip`, `MintPillButton` / `GhostPillButton`, `DropdownPill`, `ScreenHeader`, `SectionHeader` and
+`finEstFieldColors()`. Reach for those rather than a bare `Card`, `Button` or
+`OutlinedTextFieldDefaults`, so radius, tone and stroke stay defined in one place.
+
+Rows get a category glyph on a tinted disc from
+[CategoryVisuals.kt](app/src/main/java/com/pkoder/finest/presentation/components/CategoryVisuals.kt),
+keyed case-insensitively on the `TransactionOptions` vocabulary with a money-coloured fallback.
+
+Charts live in `components/charts/`: `DonutChart` + `DonutLegend` (top-N with the remainder folded
+into "Other", so the shares always total 100%), `PeriodBarChart` (buckets with only the peak
+highlighted) and `Sparkline`. Bucketing itself is `Period.buckets(...)` in
+[Period.kt](app/src/main/java/com/pkoder/finest/presentation/util/Period.kt) — pure and unit-tested:
+weeks inside a month, months inside a quarter, quarters inside a year, years for all time, and only
+buckets that have actually elapsed.
 
 ---
 
@@ -220,13 +242,33 @@ manual forms and the SMS review sheet share it, and `withCurrent()` keeps a pars
 - Coroutines only — `suspend` DAOs, `.await()` for Firebase tasks, nothing blocking the main thread.
 - Repository logs remote failures and always keeps the local write; log tags are the class name.
 - **Money and dates go through [Formatters.kt](app/src/main/java/com/pkoder/finest/presentation/util/Formatters.kt)**
-  (`asMoney`, `asSignedMoney`, `asDateTime`, `asRelativeDay`, …). `asMoney` renders Indian grouping
-  (`₹1,23,456.78`) via an explicit `groupIndianDigits`, because the JVM's `en-IN` currency format
-  groups in thousands and `DecimalFormat` supports only one grouping size. Never format money inline.
-- **Colour:** Material 3 dynamic colour on Android 12+ for chrome; income/expense semantics come from
-  `moneyColors` (`LocalMoneyColors`), which is fixed for light and dark so money never changes
-  meaning between devices. Charts use `moneyColors.chartPalette`.
-- Spacing/shapes come from `Spacing` and `FinEstShapes` (`ui/theme/Dimens.kt`).
+  (`asMoney`, `asMoneyWhole`, `asSignedMoney`, `asDateTime`, `asRelativeDay`, …). `asMoney` renders
+  Indian grouping (`₹1,23,456.78`) via an explicit `groupIndianDigits`, because the JVM's `en-IN`
+  currency format groups in thousands and `DecimalFormat` supports only one grouping size. Never
+  format money inline. `asMoneyWhole` drops the paise for summary tiles, chart tooltips and the donut
+  centre, where two extra Indian separators plus decimals ellipsise a lakh figure.
+- **Design system: "Charcoal & Mint Premium"**, taken from the Stitch reference screens in
+  `D:\Projects\Finest\Design\*` (each folder holds `DESIGN.md`, `code.html` and `screen.png`; the
+  token block is identical across all six). Treat those as the source of truth for any UI change.
+- **Colour:** the app is **dark-only** and no longer uses Material 3 dynamic colour — the mint accent
+  *is* the brand, and dynamic colour would repaint it from the wallpaper. All tokens live in
+  [Color.kt](app/src/main/java/com/pkoder/finest/presentation/ui/theme/Color.kt) as `Charcoal.*` and
+  are mapped straight onto the scheme in `Theme.kt`. Material 3's `ColorScheme` has no *fixed* roles,
+  so reach for `Charcoal.tertiaryFixed` and friends directly. Income/expense semantics come from
+  `moneyColors` (`LocalMoneyColors`): mint for income, soft pink for expense. Per the design, only
+  income amounts are tinted in lists — the minus sign and the category disc carry direction, so a
+  page of spending is not a wall of warnings. Charts use `moneyColors.chartPalette`.
+- **Type:** Hanken Grotesk for interface text (the Material `Typography`), JetBrains Mono for every
+  number via the `Mono` object in
+  [Type.kt](app/src/main/java/com/pkoder/finest/presentation/ui/theme/Type.kt) — `Mono.display`,
+  `Mono.tile`, `Mono.amount`, `Mono.label`/`labelWide`, `Mono.body`. Both are bundled in `res/font`
+  as **static per-weight instances** (OFL): `minSdk` is 24 and font-variation settings need API 26, so
+  a variable font would silently render every weight as Regular.
+- Spacing/shapes come from `Spacing` and `FinEstShapes` (`ui/theme/Dimens.kt`) — the design's 8px
+  grid, 20dp cards, 12dp inputs, pill buttons.
+- `MainActivity` calls `enableEdgeToEdge` with `SystemBarStyle.dark`, and `themes.xml` sets the
+  window background to `@color/charcoal_surface`, so there is no light flash before the first frame.
+  A custom bottom bar gets no insets from `Scaffold`, hence the `navigationBarsPadding()` inside it.
 - Notification strings live in `strings.xml`; most in-screen strings are still inline literals.
 
 ---
@@ -240,7 +282,7 @@ manual forms and the SMS review sheet share it, and `withCurrent()` keeps a pars
 | `SmsParserTest` | SBI/HDFC/BOB samples, debit-beats-credit, currency + fallback amounts, unknown bank → null, UPI description, dedupe-id stability |
 | `SmsPartsTest` | multipart joining, and that a joined message parses as one transaction |
 | `SyncReconcileTest` | `idsToPrune` — including that an empty snapshot never touches unsynced rows |
-| `FormattingTest` | amount-input sanitising (decimals!), Indian grouping, negative money, `periodStart` boundaries |
+| `FormattingTest` | amount-input sanitising (decimals!), Indian grouping, negative money, `periodStart` boundaries, and `Period.buckets` (week/month/quarter/year bucketing, elapsed-only columns, year boundaries) |
 
 `app/src/androidTest/.../MigrationTest.kt` builds a real v3 database with raw SQL, opens it with
 `MIGRATION_3_4`, and asserts rows survive, `synced` is back-filled from the `local_` prefix, and the
@@ -269,15 +311,26 @@ and has not been executed in this environment.
 8. **In-screen strings are still literals** — only notification strings moved to `strings.xml`.
 9. **Firestore has no security rules in this repo.** Per-user isolation relies on the client writing
    under `users/{uid}`; rules should be enforced server-side too.
+10. **No light theme.** The design system ships one dark token set, so `FinEstTheme` ignores
+    `isSystemInDarkTheme()`. Adding light means authoring a second palette, not flipping a flag.
+11. **The profile screen has no real preferences.** The reference design shows push/theme/language
+    rows; none of those exist here, so the card links out to the system notification settings and
+    otherwise reports facts. Don't add toggles that write nowhere.
+12. **No "last synced" timestamp is persisted**, so the sync card shows the share of rows that
+    reached Firestore rather than a time. Storing one would need a new preference/table.
+13. **The sign-in "ledger motif" is ornamental** — five fixed bars, deliberately with no numbers.
+    There is no data before auth, and the reference mock's `$12,450` preview would be a fabrication.
 
 ---
 
 ## 9. Status & roadmap
 
-Done: manual entry via FAB sheet, dashboard, searchable/filterable history with undo, Compose
+Done: manual entry via a bottom sheet, dashboard, searchable/filterable history with undo, Compose
 charts, Google auth, Room + Firestore sync with an offline queue and remote-delete reconciliation,
 SMS capture with dedupe and multipart handling, captured-payment notifications with shade actions
-and deep-link review, dark theme, unit tests + a migration test.
+and deep-link review, unit tests + a migration test, and the full "Charcoal & Mint Premium" visual
+pass across all six screens (bundled fonts, fixed dark palette, shared surface/pill/chip components,
+category glyphs, sparkline + bucketed bar charts).
 
 Pending: bulk import of historical SMS from the inbox, smarter auto-categorisation (keyword or
 Claude API), CSV export + share, date picker for manual entries, signed release APK, tombstones for
